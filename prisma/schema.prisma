@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ScreenStatus {
+  online
+  offline
+}
+
+enum MediaType {
+  video
+  image
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  isAdmin      Boolean  @default(true) @map("is_admin")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Screen {
+  id           String         @id @default(uuid())
+  name         String
+  location     String?
+  resolution   String?
+  status       ScreenStatus   @default(offline)
+  lastPing     DateTime?      @map("last_ping")
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  playlistItems PlaylistItem[]
+
+  @@index([status])
+  @@map("screens")
+}
+
+model Media {
+  id           String         @id @default(uuid())
+  filename     String
+  originalName String         @map("original_name")
+  filePath     String         @map("file_path")
+  fileType     MediaType      @map("file_type")
+  fileSize     BigInt         @map("file_size")
+  mimeType     String?        @map("mime_type")
+  duration     Int?
+  dimensions   String?
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  playlistItems PlaylistItem[]
+
+  @@index([fileType])
+  @@index([createdAt(sort: Desc)])
+  @@map("media")
+}
+
+model PlaylistItem {
+  id         String   @id @default(uuid())
+  screenId   String   @map("screen_id")
+  mediaId    String   @map("media_id")
+  orderIndex Int      @map("order_index")
+  duration   Int      @default(10)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+  screen     Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  media      Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  @@unique([screenId, orderIndex])
+  @@index([screenId])
+  @@index([screenId, orderIndex])
+  @@map("playlist_items")
+}
