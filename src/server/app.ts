@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import path from 'path';
 
 import healthRouter from './routes/health';
+import authRouter from './routes/auth';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -41,6 +42,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // Routes
 app.use('/api/health', healthRouter);
+app.use('/api/auth', authRouter);
 
 // Error handling
 app.use(notFoundHandler);
