@@ -23,5 +23,5 @@
       "@server/*": ["src/server/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src/client"]
 }
