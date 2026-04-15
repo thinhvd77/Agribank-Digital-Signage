@@ -1,0 +1,32 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+export default defineConfig({
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@shared': path.resolve(__dirname, 'src/client/shared'),
+      '@admin': path.resolve(__dirname, 'src/client/admin'),
+      '@player': path.resolve(__dirname, 'src/client/player'),
+    },
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        admin: path.resolve(__dirname, 'index.html'),
+        player: path.resolve(__dirname, 'player.html'),
+      },
+    },
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001',
+      '/socket.io': {
+        target: 'http://localhost:3001',
+        ws: true,
+      },
+      '/uploads': 'http://localhost:3001',
+    },
+  },
+});
