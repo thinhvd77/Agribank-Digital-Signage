@@ -1,18 +1,22 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@shared/hooks/useApi';
+import { useDialog } from '@shared/hooks/useDialog';
 import type { Media, MediaListResponse } from '@shared/types';
 
 interface Props {
   token: string;
+  selectedProfileId: string | null;
   onAddToPlaylist?: (media: Media) => void;
+  onSelectProfile?: () => void;
 }
 
-export default function MediaLibrary({ token, onAddToPlaylist }: Props) {
+export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist, onSelectProfile }: Props) {
   const { fetchApi, headers } = useApi(token);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const { error, success, confirm } = useDialog();
 
   const { data, isLoading } = useQuery({
     queryKey: ['media'],
@@ -40,7 +44,7 @@ export default function MediaLibrary({ token, onAddToPlaylist }: Props) {
       });
       queryClient.invalidateQueries({ queryKey: ['media'] });
     } catch (err) {
-      alert('Upload failed');
+      error('Tải lên thất bại', 'Không thể tải file lên hệ thống. Vui lòng thử lại.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -109,19 +113,33 @@ export default function MediaLibrary({ token, onAddToPlaylist }: Props) {
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   {onAddToPlaylist && (
                     <button
-                      onClick={() => onAddToPlaylist(media)}
-                      className="bg-agribank-green text-white px-3 py-1 rounded text-sm"
+                      onClick={() => {
+                        if (!selectedProfileId) {
+                          onSelectProfile?.();
+                          return;
+                        }
+                        onAddToPlaylist(media);
+                      }}
+                      className="bg-agribank-green text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
                     >
                       Add
                     </button>
                   )}
                   <button
-                    onClick={() => {
-                      if (confirm('Delete this media?')) {
+                    onClick={async () => {
+                      const shouldDelete = await confirm({
+                        title: 'Xóa media',
+                        message: `Bạn có chắc chắn muốn xóa "${media.originalName}"? Hành động này không thể hoàn tác.`,
+                        confirmText: 'Xóa',
+                        cancelText: 'Hủy',
+                        variant: 'error',
+                      });
+                      if (shouldDelete) {
                         deleteMutation.mutate(media.id);
+                        success('Đã xóa', 'Media đã được xóa thành công');
                       }
                     }}
-                    className="bg-red-600 text-white px-3 py-1 rounded text-sm"
+                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
                   >
                     Delete
                   </button>

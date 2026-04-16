@@ -7,11 +7,58 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        display: ['"Playfair Display"', 'serif'],
+        body: ['"Source Sans 3"', 'system-ui', 'sans-serif'],
+      },
       colors: {
         agribank: {
           green: '#00723F',
-          gold: '#FFD700',
+          dark: '#004d2a',
+          gold: '#D4AF37',
+          goldLight: '#F4E4A6',
+          red: '#A62C2C',
+          cream: '#FAF8F5',
         },
+      },
+      animation: {
+        'dialog-enter': 'dialogEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'dialog-exit': 'dialogExit 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'backdrop-enter': 'backdropEnter 0.3s ease-out forwards',
+        'toast-enter': 'toastEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'toast-exit': 'toastExit 0.3s ease-in forwards',
+        'pulse-gold': 'pulseGold 2s ease-in-out infinite',
+      },
+      keyframes: {
+        dialogEnter: {
+          '0%': { opacity: '0', transform: 'scale(0.9) translateY(20px)' },
+          '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+        },
+        dialogExit: {
+          '0%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+          '100%': { opacity: '0', transform: 'scale(0.95) translateY(10px)' },
+        },
+        backdropEnter: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        toastEnter: {
+          '0%': { opacity: '0', transform: 'translateX(100%) scale(0.9)' },
+          '100%': { opacity: '1', transform: 'translateX(0) scale(1)' },
+        },
+        toastExit: {
+          '0%': { opacity: '1', transform: 'translateX(0)' },
+          '100%': { opacity: '0', transform: 'translateX(100%)' },
+        },
+        pulseGold: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.8' },
+        },
+      },
+      boxShadow: {
+        'dialog': '0 25px 50px -12px rgba(0, 34, 19, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.1)',
+        'dialog-hover': '0 35px 60px -15px rgba(0, 34, 19, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.2)',
+        'glow-gold': '0 0 40px -10px rgba(212, 175, 55, 0.5)',
       },
     },
   },
