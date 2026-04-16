@@ -126,7 +126,7 @@ docker-compose up -d
 
 # Access
 # App: http://localhost:3000
-# Database: localhost:5432
+# Database: localhost:5433
 ```
 
 ## Player Setup (Kiosk Mode)
