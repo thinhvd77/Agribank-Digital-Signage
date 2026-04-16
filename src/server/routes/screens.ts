@@ -67,6 +67,23 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
   res.status(204).send();
 });
 
+// GET /api/screens/:id/playlist-full - Get full playlist with media details (admin)
+router.get('/:id/playlist-full', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const items = await prisma.playlistItem.findMany({
+    where: { screenId: req.params.id },
+    orderBy: { orderIndex: 'asc' },
+    include: { media: true },
+  });
+
+  res.json(items.map((item) => ({
+    ...item,
+    media: {
+      ...item.media,
+      fileSize: Number(item.media.fileSize),
+    },
+  })));
+});
+
 // GET /api/screens/:id/playlist - Get playlist (no auth for Player)
 router.get('/:id/playlist', async (req, res) => {
   const items = await prisma.playlistItem.findMany({

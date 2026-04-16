@@ -41,7 +41,13 @@ export default function Dashboard({ token, onLogout }: Props) {
             <>
               <PlaylistEditor token={token} screenId={selectedScreenId} />
               <div className="mt-6 flex-1 overflow-hidden">
-                <MediaLibrary token={token} screenId={selectedScreenId} />
+                <MediaLibrary
+                  token={token}
+                  screenId={selectedScreenId}
+                  onAddToPlaylist={(media) => {
+                    (window as any).__addToPlaylist?.(media);
+                  }}
+                />
               </div>
             </>
           ) : (
