@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@shared/hooks/useApi';
 import { useDialog } from '@shared/hooks/useDialog';
+import { extractVideoDuration } from '@shared/utils/videoDuration';
 import type { Media, MediaListResponse } from '@shared/types';
 
 interface Props {
@@ -36,6 +37,15 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
     const formData = new FormData();
     formData.append('file', file);
 
+    if (file.type.startsWith('video/')) {
+      try {
+        const duration = await extractVideoDuration(file);
+        formData.append('duration', String(duration));
+      } catch {
+        // Extraction failed — upload anyway, auto-extract will retry later
+      }
+    }
+
     try {
       await fetch('/api/media/upload', {
         method: 'POST',
@@ -50,6 +60,45 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
+
+  // Auto back-fill duration for videos uploaded before this feature existed.
+  // Track attempted IDs so we don't loop on videos that fail extraction.
+  const attemptedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const items = data?.items;
+    if (!items) return;
+
+    const pending = items.filter(
+      (m) => m.fileType === 'video' && m.duration == null && !attemptedRef.current.has(m.id)
+    );
+    if (pending.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      let updated = false;
+      for (const media of pending) {
+        if (cancelled) return;
+        attemptedRef.current.add(media.id);
+        try {
+          const duration = await extractVideoDuration(media.filePath);
+          await fetchApi(`/api/media/${media.id}/duration`, {
+            method: 'PATCH',
+            body: JSON.stringify({ duration }),
+          });
+          updated = true;
+        } catch {
+          // Skip; will not retry this session
+        }
+      }
+      if (updated && !cancelled) {
+        queryClient.invalidateQueries({ queryKey: ['media'] });
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [data, fetchApi, queryClient]);
 
   const formatSize = (bytes: number) => {
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;

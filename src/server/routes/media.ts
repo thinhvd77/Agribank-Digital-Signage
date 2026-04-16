@@ -111,6 +111,14 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req: AuthRe
     return res.status(400).json({ message: 'Image too large (max 10MB)' });
   }
 
+  let duration: number | null = null;
+  if (fileType === 'video' && req.body?.duration !== undefined) {
+    const parsed = Number(req.body.duration);
+    if (Number.isFinite(parsed) && parsed >= 1) {
+      duration = Math.round(parsed);
+    }
+  }
+
   const media = await prisma.media.create({
     data: {
       filename: file.filename,
@@ -119,10 +127,42 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req: AuthRe
       fileType,
       fileSize: BigInt(file.size),
       mimeType: file.mimetype,
+      duration,
     },
   });
 
   res.status(201).json({
+    ...media,
+    fileSize: Number(media.fileSize),
+  });
+});
+
+// PATCH /api/media/:id/duration - Update video duration (used for back-filling)
+router.patch('/:id/duration', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const mediaId = getMediaId(req.params.id);
+  if (!mediaId) {
+    return res.status(400).json({ message: 'Invalid media id' });
+  }
+
+  const parsed = Number(req.body?.duration);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return res.status(400).json({ message: 'Invalid duration' });
+  }
+
+  const existing = await prisma.media.findUnique({ where: { id: mediaId } });
+  if (!existing) {
+    return res.status(404).json({ message: 'Media not found' });
+  }
+  if (existing.fileType !== 'video') {
+    return res.status(400).json({ message: 'Media is not a video' });
+  }
+
+  const media = await prisma.media.update({
+    where: { id: mediaId },
+    data: { duration: Math.round(parsed) },
+  });
+
+  res.json({
     ...media,
     fileSize: Number(media.fileSize),
   });
