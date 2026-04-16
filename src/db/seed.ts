@@ -12,6 +12,12 @@ if (!databaseUrl) {
 
 const adapter = new PrismaPg(new Pool({ connectionString: databaseUrl }));
 const prisma = new PrismaClient({ adapter });
+const prismaWithProfiles = prisma as PrismaClient & {
+  profile: {
+    findFirst: (args: unknown) => Promise<{ id: string } | null>;
+    create: (args: unknown) => Promise<{ id: string }>;
+  };
+};
 
 async function main() {
   const passwordHash = await bcrypt.hash('admin123', 10);
@@ -44,7 +50,7 @@ async function main() {
       data: screenData,
     });
 
-    let defaultProfile = await prisma.profile.findFirst({
+    let defaultProfile = await prismaWithProfiles.profile.findFirst({
       where: {
         screenId: screen.id,
         name: 'Default',
@@ -52,7 +58,7 @@ async function main() {
     });
 
     if (!defaultProfile) {
-      defaultProfile = await prisma.profile.create({
+      defaultProfile = await prismaWithProfiles.profile.create({
         data: {
           screenId: screen.id,
           name: 'Default',
@@ -60,7 +66,7 @@ async function main() {
       });
     }
 
-    if (screen.activeProfileId !== defaultProfile.id) {
+    if ((screen as typeof screen & { activeProfileId?: string | null }).activeProfileId !== defaultProfile.id) {
       await prisma.screen.update({
         where: { id: screen.id },
         data: { activeProfileId: defaultProfile.id },

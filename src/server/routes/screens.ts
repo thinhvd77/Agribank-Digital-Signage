@@ -10,6 +10,15 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+type PlayerPlaylistRow = {
+  mediaId: string;
+  duration: number;
+  media: {
+    filePath: string;
+    fileType: 'video' | 'image';
+  };
+};
+
 const RESOLUTION_PATTERN = /^([1-9]\d{2,4})x([1-9]\d{2,4})$/i;
 
 function normalizeResolutionInput(value: unknown): { valid: true; value: string | null | undefined } | { valid: false; message: string } {
@@ -182,7 +191,9 @@ router.get('/:id/playlist', async (req, res) => {
     return res.json([]);
   }
 
-  const items = await prisma.playlistItem.findMany({
+  const items = await (prisma.playlistItem as unknown as {
+    findMany: (args: unknown) => Promise<PlayerPlaylistRow[]>;
+  }).findMany({
     where: { profileId: screen.activeProfileId },
     orderBy: { orderIndex: 'asc' },
     include: { media: true },
