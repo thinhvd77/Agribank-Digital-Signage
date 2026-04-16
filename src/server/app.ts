@@ -6,6 +6,7 @@ import path from 'path';
 import healthRouter from './routes/health';
 import authRouter from './routes/auth';
 import screensRouter from './routes/screens';
+import mediaRouter from './routes/media';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -45,6 +46,7 @@ app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/screens', screensRouter);
+app.use('/api/media', mediaRouter);
 
 // Error handling
 app.use(notFoundHandler);
