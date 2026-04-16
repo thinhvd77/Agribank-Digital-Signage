@@ -55,9 +55,11 @@ export default function Player({ screenId }: Props) {
     },
   });
 
-  // Handle image duration timer
+  // Handle duration timer for both images and videos.
+  // For videos, this races with onEnded — whichever fires first triggers goToNext,
+  // and the effect cleanup (or video unmount) cancels the loser.
   useEffect(() => {
-    if (!currentItem || currentItem.type === 'video') return;
+    if (!currentItem) return;
 
     timerRef.current = window.setTimeout(() => {
       goToNext();
