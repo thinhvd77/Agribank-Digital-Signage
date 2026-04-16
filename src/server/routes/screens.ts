@@ -147,7 +147,13 @@ router.post('/:id/playlist', authMiddleware, async (req: AuthRequest, res: Respo
     io.to(`screen:${screenId}`).emit('playlist_updated', { screenId, playlist });
   }
 
-  res.json(updatedItems);
+  res.json(updatedItems.map((item) => ({
+    ...item,
+    media: {
+      ...item.media,
+      fileSize: Number(item.media.fileSize),
+    },
+  })));
 });
 
 export default router;
