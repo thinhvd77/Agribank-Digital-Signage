@@ -85,12 +85,20 @@ export default function Player({ screenId }: Props) {
     );
   }
 
+  const mediaStyle: React.CSSProperties = {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    objectFit: 'contain',
+    backgroundColor: '#000',
+    transition: 'opacity 300ms',
+    opacity: fade ? 0 : 1,
+  };
+
   return (
-    <div
-      className={`w-full h-full bg-black transition-opacity duration-300 ${
-        fade ? 'opacity-0' : 'opacity-100'
-      }`}
-    >
+    <>
       {currentItem?.type === 'video' ? (
         <video
           ref={videoRef}
@@ -101,20 +109,20 @@ export default function Player({ screenId }: Props) {
           playsInline
           onEnded={handleVideoEnd}
           onError={handleVideoError}
-          className="w-full h-full object-contain"
+          style={mediaStyle}
         />
       ) : currentItem?.type === 'image' ? (
         <img
           key={currentItem.mediaId}
           src={currentItem.url}
           alt=""
-          className="w-full h-full object-contain"
+          style={mediaStyle}
           onError={() => {
             console.error('[Player] Image error, skipping');
             goToNext();
           }}
         />
       ) : null}
-    </div>
+    </>
   );
 }

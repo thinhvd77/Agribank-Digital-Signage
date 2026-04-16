@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   DndContext,
@@ -89,6 +89,12 @@ export default function PlaylistEditor({ token, screenId }: Props) {
   const [localItems, setLocalItems] = useState<PlaylistItem[] | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
+  // Reset local state when switching screens
+  useEffect(() => {
+    setLocalItems(null);
+    setHasChanges(false);
+  }, [screenId]);
+
   const { data: serverItems = [] } = useQuery({
     queryKey: ['playlist', screenId],
     queryFn: async () => {
@@ -113,7 +119,7 @@ export default function PlaylistEditor({ token, screenId }: Props) {
         body: JSON.stringify({
           items: items.map((item) => ({
             mediaId: item.mediaId,
-            duration: item.duration,
+            duration: Number(item.duration),
           })),
         }),
       });
