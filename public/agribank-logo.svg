@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="90" fill="#00723F"/>
+  <text x="100" y="90" text-anchor="middle" fill="white" font-size="24" font-weight="bold">
+    AGRIBANK
+  </text>
+  <text x="100" y="120" text-anchor="middle" fill="#FFD700" font-size="12">
+    Digital Signage
+  </text>
+</svg>
