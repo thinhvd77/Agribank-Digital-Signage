@@ -82,7 +82,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
         {isLoading ? (
           <p className="text-gray-500">Loading...</p>
         ) : (
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {data?.items.map((media) => (
               <div
                 key={media.id}
