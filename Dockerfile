@@ -22,6 +22,7 @@ RUN pnpm install --frozen-lockfile --prod --shamefully-hoist
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 RUN pnpm exec prisma generate
 
 EXPOSE 3000
