@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePlaylist } from './hooks/usePlaylist';
 import { useSocket } from '@shared/hooks/useSocket';
-import type { PlayerPlaylistItem } from '@shared/types';
+import type { PlayerPlaylistItem, ScreenConfig } from '@shared/types';
+import { parseResolution, type ParsedResolution } from '@shared/utils/resolution';
 
 interface Props {
   screenId: string;
@@ -10,8 +11,38 @@ interface Props {
 export default function Player({ screenId }: Props) {
   const { playlist, currentItem, loading, error, goToNext, updatePlaylist } = usePlaylist({ screenId });
   const [fade, setFade] = useState(false);
+  const [screenResolution, setScreenResolution] = useState<ParsedResolution | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchScreenConfig = async () => {
+      try {
+        const res = await fetch(`/api/screens/${screenId}/config`);
+        if (!res.ok) {
+          return;
+        }
+
+        const config = await res.json() as ScreenConfig;
+        if (!isMounted) {
+          return;
+        }
+
+        setScreenResolution(parseResolution(config.resolution));
+      } catch (err) {
+        console.error('[Player] Screen config fetch error:', err);
+      }
+    };
+
+    setScreenResolution(null);
+    fetchScreenConfig();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [screenId]);
 
   useSocket({
     screenId,
@@ -85,12 +116,27 @@ export default function Player({ screenId }: Props) {
     );
   }
 
+  const frameStyle: React.CSSProperties = screenResolution
+    ? {
+      position: 'relative',
+      width: `min(100vw, calc(100vh * ${screenResolution.aspectRatio}))`,
+      height: `min(100vh, calc(100vw / ${screenResolution.aspectRatio}))`,
+      backgroundColor: '#000',
+      overflow: 'hidden',
+    }
+    : {
+      position: 'relative',
+      width: '100vw',
+      height: '100vh',
+      backgroundColor: '#000',
+      overflow: 'hidden',
+    };
+
   const mediaStyle: React.CSSProperties = {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    width: '100vw',
-    height: '100vh',
+    position: 'absolute',
+    inset: 0,
+    width: '100%',
+    height: '100%',
     objectFit: 'contain',
     backgroundColor: '#000',
     transition: 'opacity 300ms',
@@ -98,31 +144,33 @@ export default function Player({ screenId }: Props) {
   };
 
   return (
-    <>
-      {currentItem?.type === 'video' ? (
-        <video
-          ref={videoRef}
-          key={currentItem.mediaId}
-          src={currentItem.url}
-          autoPlay
-          muted
-          playsInline
-          onEnded={handleVideoEnd}
-          onError={handleVideoError}
-          style={mediaStyle}
-        />
-      ) : currentItem?.type === 'image' ? (
-        <img
-          key={currentItem.mediaId}
-          src={currentItem.url}
-          alt=""
-          style={mediaStyle}
-          onError={() => {
-            console.error('[Player] Image error, skipping');
-            goToNext();
-          }}
-        />
-      ) : null}
-    </>
+    <div className="w-full h-full bg-black flex items-center justify-center">
+      <div style={frameStyle}>
+        {currentItem?.type === 'video' ? (
+          <video
+            ref={videoRef}
+            key={currentItem.mediaId}
+            src={currentItem.url}
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnd}
+            onError={handleVideoError}
+            style={mediaStyle}
+          />
+        ) : currentItem?.type === 'image' ? (
+          <img
+            key={currentItem.mediaId}
+            src={currentItem.url}
+            alt=""
+            style={mediaStyle}
+            onError={() => {
+              console.error('[Player] Image error, skipping');
+              goToNext();
+            }}
+          />
+        ) : null}
+      </div>
+    </div>
   );
 }

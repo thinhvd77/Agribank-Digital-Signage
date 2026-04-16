@@ -44,9 +44,14 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
                 }`}
               />
             </div>
-            {screen.location && (
-              <p className="text-sm text-gray-500 mt-1">{screen.location}</p>
-            )}
+            <div className="mt-1 space-y-1">
+              {screen.location && (
+                <p className="text-sm text-gray-500">{screen.location}</p>
+              )}
+              <p className="text-xs text-gray-400">
+                Resolution: {screen.resolution || 'Not set'}
+              </p>
+            </div>
           </button>
         ))}
       </div>

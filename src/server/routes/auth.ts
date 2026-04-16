@@ -33,7 +33,7 @@ router.post('/login', async (req: Request, res: Response) => {
   }
 
   const secret = process.env.JWT_SECRET || 'fallback-secret';
-  const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+  const expiresIn = (process.env.JWT_EXPIRES_IN || '24h') as jwt.SignOptions['expiresIn'];
 
   const token = jwt.sign(
     { userId: user.id, isAdmin: user.isAdmin },

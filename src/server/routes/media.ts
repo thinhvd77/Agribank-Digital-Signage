@@ -14,6 +14,18 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+function getMediaId(idParam: string | string[] | undefined): string | null {
+  if (typeof idParam === 'string' && idParam) {
+    return idParam;
+  }
+
+  if (Array.isArray(idParam)) {
+    return idParam[0] ?? null;
+  }
+
+  return null;
+}
+
 const UPLOAD_DIR = process.env.UPLOAD_DIR || './uploads';
 const MAX_VIDEO_SIZE = parseInt(process.env.MAX_FILE_SIZE_VIDEO || '524288000');
 const MAX_IMAGE_SIZE = parseInt(process.env.MAX_FILE_SIZE_IMAGE || '10485760');
@@ -118,8 +130,13 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req: AuthRe
 
 // DELETE /api/media/:id - Delete media
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const mediaId = getMediaId(req.params.id);
+  if (!mediaId) {
+    return res.status(400).json({ message: 'Invalid media id' });
+  }
+
   const media = await prisma.media.findUnique({
-    where: { id: req.params.id },
+    where: { id: mediaId },
   });
 
   if (!media) {
@@ -134,7 +151,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
 
   // Delete from database
   await prisma.media.delete({
-    where: { id: req.params.id },
+    where: { id: mediaId },
   });
 
   res.status(204).send();

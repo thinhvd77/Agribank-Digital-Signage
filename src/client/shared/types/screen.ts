@@ -22,3 +22,8 @@ export interface UpdateScreenInput {
   location?: string;
   resolution?: string;
 }
+
+export interface ScreenConfig {
+  id: string;
+  resolution: string | null;
+}

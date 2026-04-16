@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import ScreenList from '../components/ScreenList';
+import ScreenSettings from '../components/ScreenSettings';
 import PlaylistEditor from '../components/PlaylistEditor';
 import MediaLibrary from '../components/MediaLibrary';
 
@@ -39,6 +40,9 @@ export default function Dashboard({ token, onLogout }: Props) {
         <main className="flex-1 flex flex-col overflow-hidden p-6">
           {selectedScreenId ? (
             <>
+              <div className="mb-6">
+                <ScreenSettings token={token} screenId={selectedScreenId} />
+              </div>
               <PlaylistEditor token={token} screenId={selectedScreenId} />
               <div className="mt-6 flex-1 overflow-hidden">
                 <MediaLibrary

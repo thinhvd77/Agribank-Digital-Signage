@@ -10,6 +10,51 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+const RESOLUTION_PATTERN = /^([1-9]\d{2,4})x([1-9]\d{2,4})$/i;
+
+function normalizeResolutionInput(value: unknown): { valid: true; value: string | null | undefined } | { valid: false; message: string } {
+  if (value === undefined) {
+    return { valid: true, value: undefined };
+  }
+
+  if (value === null) {
+    return { valid: true, value: null };
+  }
+
+  if (typeof value !== 'string') {
+    return {
+      valid: false,
+      message: 'Resolution must be a string in WxH format, e.g. 1920x1080',
+    };
+  }
+
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return { valid: true, value: null };
+  }
+
+  if (!RESOLUTION_PATTERN.test(normalized)) {
+    return {
+      valid: false,
+      message: 'Resolution must be in WxH format, e.g. 1920x1080',
+    };
+  }
+
+  return { valid: true, value: normalized };
+}
+
+function getScreenId(idParam: string | string[] | undefined): string | null {
+  if (typeof idParam === 'string' && idParam) {
+    return idParam;
+  }
+
+  if (Array.isArray(idParam)) {
+    return idParam[0] ?? null;
+  }
+
+  return null;
+}
+
 // GET /api/screens - List all screens
 router.get('/', authMiddleware, async (_req: AuthRequest, res: Response) => {
   const screens = await prisma.screen.findMany({
@@ -20,8 +65,13 @@ router.get('/', authMiddleware, async (_req: AuthRequest, res: Response) => {
 
 // GET /api/screens/:id - Get single screen
 router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const screenId = getScreenId(req.params.id);
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
   const screen = await prisma.screen.findUnique({
-    where: { id: req.params.id },
+    where: { id: screenId },
   });
 
   if (!screen) {
@@ -39,8 +89,13 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: 'Name is required' });
   }
 
+  const normalizedResolution = normalizeResolutionInput(resolution);
+  if (!normalizedResolution.valid) {
+    return res.status(400).json({ message: normalizedResolution.message });
+  }
+
   const screen = await prisma.screen.create({
-    data: { name, location, resolution },
+    data: { name, location, resolution: normalizedResolution.value },
   });
 
   res.status(201).json(screen);
@@ -49,10 +104,20 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 // PUT /api/screens/:id - Update screen
 router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { name, location, resolution } = req.body;
+  const screenId = getScreenId(req.params.id);
+
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
+  const normalizedResolution = normalizeResolutionInput(resolution);
+  if (!normalizedResolution.valid) {
+    return res.status(400).json({ message: normalizedResolution.message });
+  }
 
   const screen = await prisma.screen.update({
-    where: { id: req.params.id },
-    data: { name, location, resolution },
+    where: { id: screenId },
+    data: { name, location, resolution: normalizedResolution.value },
   });
 
   res.json(screen);
@@ -60,17 +125,49 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/screens/:id - Delete screen
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const screenId = getScreenId(req.params.id);
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
   await prisma.screen.delete({
-    where: { id: req.params.id },
+    where: { id: screenId },
   });
 
   res.status(204).send();
 });
 
+// GET /api/screens/:id/config - Get public screen config for Player
+router.get('/:id/config', async (req, res) => {
+  const screenId = getScreenId(req.params.id);
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
+  const screen = await prisma.screen.findUnique({
+    where: { id: screenId },
+    select: {
+      id: true,
+      resolution: true,
+    },
+  });
+
+  if (!screen) {
+    return res.status(404).json({ message: 'Screen not found' });
+  }
+
+  res.json(screen);
+});
+
 // GET /api/screens/:id/playlist-full - Get full playlist with media details (admin)
 router.get('/:id/playlist-full', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const screenId = getScreenId(req.params.id);
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
   const items = await prisma.playlistItem.findMany({
-    where: { screenId: req.params.id },
+    where: { screenId },
     orderBy: { orderIndex: 'asc' },
     include: { media: true },
   });
@@ -86,8 +183,13 @@ router.get('/:id/playlist-full', authMiddleware, async (req: AuthRequest, res: R
 
 // GET /api/screens/:id/playlist - Get playlist (no auth for Player)
 router.get('/:id/playlist', async (req, res) => {
+  const screenId = getScreenId(req.params.id);
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
+
   const items = await prisma.playlistItem.findMany({
-    where: { screenId: req.params.id },
+    where: { screenId },
     orderBy: { orderIndex: 'asc' },
     include: { media: true },
   });
@@ -105,7 +207,11 @@ router.get('/:id/playlist', async (req, res) => {
 // POST /api/screens/:id/playlist - Update playlist
 router.post('/:id/playlist', authMiddleware, async (req: AuthRequest, res: Response) => {
   const { items } = req.body;
-  const screenId = req.params.id;
+  const screenId = getScreenId(req.params.id);
+
+  if (!screenId) {
+    return res.status(400).json({ message: 'Invalid screen id' });
+  }
 
   if (!Array.isArray(items)) {
     return res.status(400).json({ message: 'Items array required' });
