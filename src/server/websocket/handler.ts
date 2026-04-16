@@ -38,6 +38,26 @@ export function setupWebSocket(server: HttpServer) {
 
     socket.on('register', async (payload: RegisterPayload) => {
       const { screenId } = payload;
+      if (!screenId) {
+        socket.disconnect(true);
+        return;
+      }
+
+      const screen = await prisma.screen.findFirst({
+        where: {
+          id: screenId,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (!screen) {
+        console.warn(`[Socket] Reject register for deleted/missing screen ${screenId}`);
+        socket.emit('registration_failed', { message: 'Screen not found' });
+        socket.disconnect(true);
+        return;
+      }
+
       console.log(`[Socket] Screen ${screenId} registered`);
 
       screenSockets.set(screenId, socket);
@@ -52,10 +72,23 @@ export function setupWebSocket(server: HttpServer) {
 
     socket.on('status', async (payload: StatusPayload) => {
       const { screenId } = payload;
-      await prisma.screen.update({
-        where: { id: screenId },
+      if (!screenId) {
+        return;
+      }
+
+      const result = await prisma.screen.updateMany({
+        where: {
+          id: screenId,
+          deletedAt: null,
+        },
         data: { lastPing: new Date() },
-      }).catch(() => {});
+      });
+
+      if (result.count === 0) {
+        console.warn(`[Socket] Disconnect missing/deleted screen ${screenId}`);
+        screenSockets.delete(screenId);
+        socket.disconnect(true);
+      }
     });
 
     socket.on('disconnect', async () => {
@@ -65,8 +98,8 @@ export function setupWebSocket(server: HttpServer) {
       for (const [screenId, s] of screenSockets) {
         if (s.id === socket.id) {
           screenSockets.delete(screenId);
-          await prisma.screen.update({
-            where: { id: screenId },
+          await prisma.screen.updateMany({
+            where: { id: screenId, deletedAt: null },
             data: { status: 'offline' },
           }).catch(() => {});
           break;

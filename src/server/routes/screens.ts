@@ -67,6 +67,7 @@ function getScreenId(idParam: string | string[] | undefined): string | null {
 // GET /api/screens - List all screens
 router.get('/', authMiddleware, async (_req: AuthRequest, res: Response) => {
   const screens = await prisma.screen.findMany({
+    where: { deletedAt: null },
     orderBy: { name: 'asc' },
   });
   res.json(screens);
@@ -79,8 +80,8 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
-  const screen = await prisma.screen.findUnique({
-    where: { id: screenId },
+  const screen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
   });
 
   if (!screen) {
@@ -124,6 +125,15 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: normalizedResolution.message });
   }
 
+  const existingScreen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
+    select: { id: true },
+  });
+
+  if (!existingScreen) {
+    return res.status(404).json({ message: 'Screen not found' });
+  }
+
   const screen = await prisma.screen.update({
     where: { id: screenId },
     data: { name, location, resolution: normalizedResolution.value },
@@ -139,9 +149,21 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
-  await prisma.screen.delete({
-    where: { id: screenId },
+  const result = await prisma.screen.updateMany({
+    where: {
+      id: screenId,
+      deletedAt: null,
+    },
+    data: {
+      deletedAt: new Date(),
+      status: 'offline',
+      activeProfileId: null,
+    },
   });
+
+  if (result.count === 0) {
+    return res.status(404).json({ message: 'Screen not found' });
+  }
 
   res.status(204).send();
 });
@@ -153,8 +175,8 @@ router.get('/:id/config', async (req, res) => {
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
-  const screen = await prisma.screen.findUnique({
-    where: { id: screenId },
+  const screen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
     select: {
       id: true,
       resolution: true,
@@ -175,8 +197,8 @@ router.get('/:id/playlist', async (req, res) => {
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
-  const screen = await prisma.screen.findUnique({
-    where: { id: screenId },
+  const screen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
     select: {
       id: true,
       activeProfileId: true,

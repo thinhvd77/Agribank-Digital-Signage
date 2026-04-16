@@ -5,6 +5,7 @@ export interface Screen {
   name: string;
   location: string | null;
   resolution: string | null;
+  deletedAt: string | null;
   status: ScreenStatus;
   lastPing: string | null;
   createdAt: string;

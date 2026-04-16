@@ -67,8 +67,8 @@ router.get('/by-screen/:screenId', authMiddleware, async (req: AuthRequest, res:
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
-  const screen = await prisma.screen.findUnique({
-    where: { id: screenId },
+  const screen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
     select: {
       id: true,
       activeProfileId: true,
@@ -102,8 +102,8 @@ router.post('/by-screen/:screenId', authMiddleware, async (req: AuthRequest, res
     return res.status(400).json({ message: 'Profile name is required' });
   }
 
-  const screen = await prisma.screen.findUnique({
-    where: { id: screenId },
+  const screen = await prisma.screen.findFirst({
+    where: { id: screenId, deletedAt: null },
     select: { id: true, activeProfileId: true },
   });
 
@@ -143,11 +143,20 @@ router.put('/:profileId/activate', authMiddleware, async (req: AuthRequest, res:
     select: {
       id: true,
       screenId: true,
+      screen: {
+        select: {
+          deletedAt: true,
+        },
+      },
     },
   });
 
   if (!profile) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  if (profile.screen?.deletedAt) {
+    return res.status(404).json({ message: 'Screen not found' });
   }
 
   await prisma.screen.update({
@@ -190,11 +199,23 @@ router.put('/:profileId', authMiddleware, async (req: AuthRequest, res: Response
 
   const existing = await prisma.profile.findUnique({
     where: { id: profileId },
-    select: { id: true, screenId: true },
+    select: {
+      id: true,
+      screenId: true,
+      screen: {
+        select: {
+          deletedAt: true,
+        },
+      },
+    },
   });
 
   if (!existing) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  if (existing.screen?.deletedAt) {
+    return res.status(404).json({ message: 'Screen not found' });
   }
 
   try {
@@ -235,6 +256,7 @@ router.delete('/:profileId', authMiddleware, async (req: AuthRequest, res: Respo
       screen: {
         select: {
           activeProfileId: true,
+          deletedAt: true,
         },
       },
     },
@@ -242,6 +264,10 @@ router.delete('/:profileId', authMiddleware, async (req: AuthRequest, res: Respo
 
   if (!profile) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  if (profile.screen.deletedAt) {
+    return res.status(404).json({ message: 'Screen not found' });
   }
 
   const profileCount = await prisma.profile.count({
@@ -289,11 +315,22 @@ router.get('/:profileId/playlist-full', authMiddleware, async (req: AuthRequest,
 
   const profile = await prisma.profile.findUnique({
     where: { id: profileId },
-    select: { id: true },
+    select: {
+      id: true,
+      screen: {
+        select: {
+          deletedAt: true,
+        },
+      },
+    },
   });
 
   if (!profile) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  if (profile.screen?.deletedAt) {
+    return res.status(404).json({ message: 'Screen not found' });
   }
 
   const items = await prisma.playlistItem.findMany({
@@ -329,13 +366,20 @@ router.post('/:profileId/playlist', authMiddleware, async (req: AuthRequest, res
       id: true,
       screenId: true,
       screen: {
-        select: { activeProfileId: true },
+        select: {
+          activeProfileId: true,
+          deletedAt: true,
+        },
       },
     },
   });
 
   if (!profile) {
     return res.status(404).json({ message: 'Profile not found' });
+  }
+
+  if (profile.screen.deletedAt) {
+    return res.status(404).json({ message: 'Screen not found' });
   }
 
   await prisma.playlistItem.deleteMany({

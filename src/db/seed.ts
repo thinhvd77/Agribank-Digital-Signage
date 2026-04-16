@@ -43,6 +43,7 @@ async function main() {
       where: {
         name: screenData.name,
         location: screenData.location,
+        deletedAt: null,
       },
     });
 

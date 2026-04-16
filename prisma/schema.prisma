@@ -37,6 +37,7 @@ model Screen {
   name            String
   location        String?
   resolution      String?
+  deletedAt       DateTime?      @map("deleted_at")
   activeProfileId String?        @map("active_profile_id")
   status          ScreenStatus   @default(offline)
   lastPing        DateTime?      @map("last_ping")
@@ -47,6 +48,7 @@ model Screen {
 
   @@index([status])
   @@index([activeProfileId])
+  @@index([deletedAt])
   @@map("screens")
 }
 
