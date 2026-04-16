@@ -118,6 +118,18 @@ router.post('/:id/playlist', authMiddleware, async (req: AuthRequest, res: Respo
     include: { media: true },
   });
 
+  // Notify connected players via WebSocket
+  const io = req.app.get('io');
+  if (io) {
+    const playlist = updatedItems.map((item) => ({
+      mediaId: item.mediaId,
+      url: item.media.filePath,
+      type: item.media.fileType,
+      duration: item.duration,
+    }));
+    io.to(`screen:${screenId}`).emit('playlist_updated', { screenId, playlist });
+  }
+
   res.json(updatedItems);
 });
 
