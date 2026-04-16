@@ -2,7 +2,7 @@ import type { Media } from './media';
 
 export interface PlaylistItem {
   id: string;
-  screenId: string;
+  profileId: string;
   mediaId: string;
   orderIndex: number;
   duration: number;

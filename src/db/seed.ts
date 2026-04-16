@@ -32,15 +32,43 @@ async function main() {
     { name: 'Chi nhanh Da Nang', location: 'Tang 1, loi vao', resolution: '1920x1080' },
   ];
 
-  for (const screen of screens) {
-    await prisma.screen.upsert({
-      where: { id: screen.name.toLowerCase().replace(/\s+/g, '-') },
-      update: {},
-      create: screen,
+  for (const screenData of screens) {
+    const existingScreen = await prisma.screen.findFirst({
+      where: {
+        name: screenData.name,
+        location: screenData.location,
+      },
     });
+
+    const screen = existingScreen ?? await prisma.screen.create({
+      data: screenData,
+    });
+
+    let defaultProfile = await prisma.profile.findFirst({
+      where: {
+        screenId: screen.id,
+        name: 'Default',
+      },
+    });
+
+    if (!defaultProfile) {
+      defaultProfile = await prisma.profile.create({
+        data: {
+          screenId: screen.id,
+          name: 'Default',
+        },
+      });
+    }
+
+    if (screen.activeProfileId !== defaultProfile.id) {
+      await prisma.screen.update({
+        where: { id: screen.id },
+        data: { activeProfileId: defaultProfile.id },
+      });
+    }
   }
 
-  console.log('Seed completed: 1 admin user, 3 screens');
+  console.log('Seed completed: 1 admin user, 3 screens, default profile per screen');
 }
 
 main()

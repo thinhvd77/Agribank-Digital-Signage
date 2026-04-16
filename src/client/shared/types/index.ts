@@ -1,6 +1,7 @@
 export * from './screen';
 export * from './media';
 export * from './playlist';
+export * from './profile';
 
 export interface User {
   id: string;

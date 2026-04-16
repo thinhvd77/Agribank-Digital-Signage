@@ -22,7 +22,7 @@ import type { PlaylistItem, Media } from '@shared/types';
 
 interface Props {
   token: string;
-  screenId: string;
+  profileId: string;
 }
 
 interface SortableItemProps {
@@ -83,23 +83,23 @@ function SortableItem({ item, onRemove, onDurationChange }: SortableItemProps) {
   );
 }
 
-export default function PlaylistEditor({ token, screenId }: Props) {
+export default function PlaylistEditor({ token, profileId }: Props) {
   const { fetchApi } = useApi(token);
   const queryClient = useQueryClient();
   const [localItems, setLocalItems] = useState<PlaylistItem[] | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Reset local state when switching screens
+  // Reset local state when switching profiles
   useEffect(() => {
     setLocalItems(null);
     setHasChanges(false);
-  }, [screenId]);
+  }, [profileId]);
 
   const { data: serverItems = [] } = useQuery({
-    queryKey: ['playlist', screenId],
+    queryKey: ['playlist', profileId],
     queryFn: async () => {
       const fullItems = await fetchApi<PlaylistItem[]>(
-        `/api/screens/${screenId}/playlist-full`
+        `/api/profiles/${profileId}/playlist-full`
       ).catch(() => []);
       return fullItems;
     },
@@ -114,7 +114,7 @@ export default function PlaylistEditor({ token, screenId }: Props) {
 
   const saveMutation = useMutation({
     mutationFn: async (items: PlaylistItem[]) => {
-      await fetchApi(`/api/screens/${screenId}/playlist`, {
+      await fetchApi(`/api/profiles/${profileId}/playlist`, {
         method: 'POST',
         body: JSON.stringify({
           items: items.map((item) => ({
@@ -125,7 +125,7 @@ export default function PlaylistEditor({ token, screenId }: Props) {
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlist', screenId] });
+      queryClient.invalidateQueries({ queryKey: ['playlist', profileId] });
       setLocalItems(null);
       setHasChanges(false);
     },
@@ -159,7 +159,7 @@ export default function PlaylistEditor({ token, screenId }: Props) {
   const handleAddMedia = (media: Media) => {
     const newItem: PlaylistItem = {
       id: `temp-${Date.now()}`,
-      screenId,
+      profileId,
       mediaId: media.id,
       orderIndex: items.length,
       duration: media.fileType === 'video' ? (media.duration || 30) : 10,
@@ -172,7 +172,13 @@ export default function PlaylistEditor({ token, screenId }: Props) {
   };
 
   // Expose addMedia method via window for MediaLibrary
-  (window as any).__addToPlaylist = handleAddMedia;
+  useEffect(() => {
+    (window as any).__addToPlaylist = handleAddMedia;
+
+    return () => {
+      delete (window as any).__addToPlaylist;
+    };
+  }, [handleAddMedia]);
 
   return (
     <div className="bg-white rounded-lg border p-4">

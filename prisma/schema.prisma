@@ -33,18 +33,36 @@ model User {
 }
 
 model Screen {
-  id           String         @id @default(uuid())
-  name         String
-  location     String?
-  resolution   String?
-  status       ScreenStatus   @default(offline)
-  lastPing     DateTime?      @map("last_ping")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
-  playlistItems PlaylistItem[]
+  id              String         @id @default(uuid())
+  name            String
+  location        String?
+  resolution      String?
+  activeProfileId String?        @map("active_profile_id")
+  status          ScreenStatus   @default(offline)
+  lastPing        DateTime?      @map("last_ping")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  profiles        Profile[]      @relation("ScreenProfiles")
+  activeProfile   Profile?       @relation("ActiveProfile", fields: [activeProfileId], references: [id], onDelete: SetNull)
 
   @@index([status])
+  @@index([activeProfileId])
   @@map("screens")
+}
+
+model Profile {
+  id               String         @id @default(uuid())
+  screenId         String         @map("screen_id")
+  name             String
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+  screen           Screen         @relation("ScreenProfiles", fields: [screenId], references: [id], onDelete: Cascade)
+  activeInScreens  Screen[]       @relation("ActiveProfile")
+  playlistItems    PlaylistItem[]
+
+  @@unique([screenId, name])
+  @@index([screenId])
+  @@map("profiles")
 }
 
 model Media {
@@ -68,17 +86,17 @@ model Media {
 
 model PlaylistItem {
   id         String   @id @default(uuid())
-  screenId   String   @map("screen_id")
+  profileId  String   @map("profile_id")
   mediaId    String   @map("media_id")
   orderIndex Int      @map("order_index")
   duration   Int      @default(10)
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
-  screen     Screen   @relation(fields: [screenId], references: [id], onDelete: Cascade)
+  profile    Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
   media      Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
 
-  @@unique([screenId, orderIndex])
-  @@index([screenId])
-  @@index([screenId, orderIndex])
+  @@unique([profileId, orderIndex])
+  @@index([profileId])
+  @@index([profileId, orderIndex])
   @@map("playlist_items")
 }

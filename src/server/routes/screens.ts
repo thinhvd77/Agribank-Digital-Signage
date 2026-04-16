@@ -159,37 +159,31 @@ router.get('/:id/config', async (req, res) => {
   res.json(screen);
 });
 
-// GET /api/screens/:id/playlist-full - Get full playlist with media details (admin)
-router.get('/:id/playlist-full', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const screenId = getScreenId(req.params.id);
-  if (!screenId) {
-    return res.status(400).json({ message: 'Invalid screen id' });
-  }
-
-  const items = await prisma.playlistItem.findMany({
-    where: { screenId },
-    orderBy: { orderIndex: 'asc' },
-    include: { media: true },
-  });
-
-  res.json(items.map((item) => ({
-    ...item,
-    media: {
-      ...item.media,
-      fileSize: Number(item.media.fileSize),
-    },
-  })));
-});
-
-// GET /api/screens/:id/playlist - Get playlist (no auth for Player)
+// GET /api/screens/:id/playlist - Get active profile playlist (no auth for Player)
 router.get('/:id/playlist', async (req, res) => {
   const screenId = getScreenId(req.params.id);
   if (!screenId) {
     return res.status(400).json({ message: 'Invalid screen id' });
   }
 
+  const screen = await prisma.screen.findUnique({
+    where: { id: screenId },
+    select: {
+      id: true,
+      activeProfileId: true,
+    },
+  });
+
+  if (!screen) {
+    return res.status(404).json({ message: 'Screen not found' });
+  }
+
+  if (!screen.activeProfileId) {
+    return res.json([]);
+  }
+
   const items = await prisma.playlistItem.findMany({
-    where: { screenId },
+    where: { profileId: screen.activeProfileId },
     orderBy: { orderIndex: 'asc' },
     include: { media: true },
   });
@@ -202,64 +196,6 @@ router.get('/:id/playlist', async (req, res) => {
   }));
 
   res.json(playlist);
-});
-
-// POST /api/screens/:id/playlist - Update playlist
-router.post('/:id/playlist', authMiddleware, async (req: AuthRequest, res: Response) => {
-  const { items } = req.body;
-  const screenId = getScreenId(req.params.id);
-
-  if (!screenId) {
-    return res.status(400).json({ message: 'Invalid screen id' });
-  }
-
-  if (!Array.isArray(items)) {
-    return res.status(400).json({ message: 'Items array required' });
-  }
-
-  // Delete existing playlist items
-  await prisma.playlistItem.deleteMany({
-    where: { screenId },
-  });
-
-  // Create new items
-  const createData = items.map((item: { mediaId: string; duration: number }, index: number) => ({
-    screenId,
-    mediaId: item.mediaId,
-    orderIndex: index,
-    duration: item.duration || 10,
-  }));
-
-  await prisma.playlistItem.createMany({
-    data: createData,
-  });
-
-  // Return updated playlist
-  const updatedItems = await prisma.playlistItem.findMany({
-    where: { screenId },
-    orderBy: { orderIndex: 'asc' },
-    include: { media: true },
-  });
-
-  // Notify connected players via WebSocket
-  const io = req.app.get('io');
-  if (io) {
-    const playlist = updatedItems.map((item) => ({
-      mediaId: item.mediaId,
-      url: item.media.filePath,
-      type: item.media.fileType,
-      duration: item.duration,
-    }));
-    io.to(`screen:${screenId}`).emit('playlist_updated', { screenId, playlist });
-  }
-
-  res.json(updatedItems.map((item) => ({
-    ...item,
-    media: {
-      ...item.media,
-      fileSize: Number(item.media.fileSize),
-    },
-  })));
 });
 
 export default router;

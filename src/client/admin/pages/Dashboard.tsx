@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ScreenList from '../components/ScreenList';
 import ScreenSettings from '../components/ScreenSettings';
+import ProfileTabs from '../components/ProfileTabs';
 import PlaylistEditor from '../components/PlaylistEditor';
 import MediaLibrary from '../components/MediaLibrary';
 
@@ -11,6 +12,11 @@ interface Props {
 
 export default function Dashboard({ token, onLogout }: Props) {
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(null);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedProfileId(null);
+  }, [selectedScreenId]);
 
   return (
     <div className="h-screen flex flex-col">
@@ -43,12 +49,32 @@ export default function Dashboard({ token, onLogout }: Props) {
               <div className="mb-6">
                 <ScreenSettings token={token} screenId={selectedScreenId} />
               </div>
-              <PlaylistEditor token={token} screenId={selectedScreenId} />
+
+              <div className="mb-6">
+                <ProfileTabs
+                  token={token}
+                  screenId={selectedScreenId}
+                  selectedProfileId={selectedProfileId}
+                  onSelectProfile={setSelectedProfileId}
+                />
+              </div>
+
+              {selectedProfileId ? (
+                <PlaylistEditor token={token} profileId={selectedProfileId} />
+              ) : (
+                <div className="bg-white rounded-lg border p-4 text-gray-500">
+                  Select a profile to manage its playlist.
+                </div>
+              )}
+
               <div className="mt-6 flex-1 overflow-hidden">
                 <MediaLibrary
                   token={token}
-                  screenId={selectedScreenId}
                   onAddToPlaylist={(media) => {
+                    if (!selectedProfileId) {
+                      alert('Please select a profile before adding media to playlist.');
+                      return;
+                    }
                     (window as any).__addToPlaylist?.(media);
                   }}
                 />

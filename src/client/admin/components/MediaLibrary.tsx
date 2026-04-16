@@ -5,7 +5,6 @@ import type { Media, MediaListResponse } from '@shared/types';
 
 interface Props {
   token: string;
-  screenId: string;
   onAddToPlaylist?: (media: Media) => void;
 }
 
