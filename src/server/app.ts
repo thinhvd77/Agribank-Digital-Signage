@@ -42,11 +42,23 @@ app.use(express.json());
 // Static files
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
-// Routes
+// API routes
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/screens', screensRouter);
 app.use('/api/media', mediaRouter);
+
+// Serve static frontend in production
+const distPath = path.join(process.cwd(), 'dist');
+app.use(express.static(distPath, {
+  extensions: ['html'],
+  index: 'index.html',
+}));
+
+// Catch-all for SPA routing (exclude /api)
+app.get(/^\/(?!api\/).*/, (_req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 // Error handling
 app.use(notFoundHandler);
