@@ -46,7 +46,7 @@ function ModalDialog() {
       onClick={handleBackdropClick}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-backdrop-enter"
       style={{
-        background: 'rgba(0, 45, 25, 0.6)',
+        background: 'rgba(60, 8, 20, 0.6)',
         backdropFilter: 'blur(4px)',
       }}
     >
@@ -91,13 +91,13 @@ function ModalDialog() {
           {/* Title */}
           <h2
             className="font-display text-2xl font-semibold text-center mb-3"
-            style={{ color: '#1a3a2a' }}
+            style={{ color: '#2a0f18' }}
           >
             {dialog.title}
           </h2>
 
           {/* Message */}
-          <p className="font-body text-base text-center mb-8 leading-relaxed" style={{ color: '#4a5f52' }}>
+          <p className="font-body text-base text-center mb-8 leading-relaxed" style={{ color: '#5a3a42' }}>
             {dialog.message}
           </p>
 
@@ -115,8 +115,8 @@ function ModalDialog() {
                   color: '#4a5f52',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = '#00723F';
-                  e.currentTarget.style.color = '#00723F';
+                  e.currentTarget.style.borderColor = '#AE1C40';
+                  e.currentTarget.style.color = '#AE1C40';
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.borderColor = '#c9d6cf';
@@ -144,7 +144,7 @@ function ModalDialog() {
           {/* Decorative elements */}
           <div
             className="absolute -bottom-2 left-4 right-4 h-4 rounded-full -z-10 opacity-60"
-            style={{ background: 'linear-gradient(90deg, transparent, #00723F20, transparent)' }}
+            style={{ background: 'linear-gradient(90deg, transparent, #AE1C4020, transparent)' }}
           />
         </div>
       </div>
@@ -232,10 +232,10 @@ function ToastItem({ toast, index, onClose }: ToastItemProps) {
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-display font-semibold text-base mb-0.5" style={{ color: '#1a3a2a' }}>
+          <h3 className="font-display font-semibold text-base mb-0.5" style={{ color: '#2a0f18' }}>
             {toast.title}
           </h3>
-          <p className="font-body text-sm leading-relaxed truncate" style={{ color: '#4a5f52' }}>
+          <p className="font-body text-sm leading-relaxed truncate" style={{ color: '#5a3a42' }}>
             {toast.message}
           </p>
         </div>
@@ -245,7 +245,7 @@ function ToastItem({ toast, index, onClose }: ToastItemProps) {
           onClick={onClose}
           className="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center
                    transition-all duration-200 hover:bg-black/5"
-          style={{ color: '#6b8a7a' }}
+          style={{ color: '#8a6b70' }}
         >
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path

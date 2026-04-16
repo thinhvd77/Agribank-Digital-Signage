@@ -71,7 +71,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+            className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
           >
             {uploading ? 'Uploading...' : 'Upload Media'}
           </button>
@@ -120,7 +120,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                         }
                         onAddToPlaylist(media);
                       }}
-                      className="bg-agribank-green text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                      className="bg-agribank-green text-white px-3 py-1 rounded text-sm hover:bg-agribank-dark transition-colors"
                     >
                       Add
                     </button>

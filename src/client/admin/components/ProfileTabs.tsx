@@ -171,7 +171,7 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
         <button
           onClick={handleCreateProfile}
           disabled={isMutating}
-          className="bg-agribank-green text-white px-3 py-1.5 rounded hover:bg-green-700 disabled:opacity-50"
+          className="bg-agribank-green text-white px-3 py-1.5 rounded hover:bg-agribank-dark disabled:opacity-50"
         >
           + Profile
         </button>
@@ -190,7 +190,7 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
                   onClick={() => onSelectProfile(profile.id)}
                   className={`px-3 py-2 rounded border text-sm transition-colors ${
                     isSelected
-                      ? 'border-agribank-green bg-green-50 text-agribank-green font-medium'
+                      ? 'border-agribank-green bg-red-50 text-agribank-green font-medium'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >

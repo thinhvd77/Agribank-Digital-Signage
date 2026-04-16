@@ -147,7 +147,7 @@ export default function ScreenCrudModal({
             <button
               type="submit"
               disabled={isSubmitting || !!resolutionError}
-              className="bg-agribank-green text-white px-4 py-2 rounded text-sm hover:bg-green-700 disabled:opacity-50"
+              className="bg-agribank-green text-white px-4 py-2 rounded text-sm hover:bg-agribank-dark disabled:opacity-50"
             >
               {isSubmitting ? 'Saving...' : submitText}
             </button>

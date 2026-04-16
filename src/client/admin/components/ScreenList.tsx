@@ -131,7 +131,7 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
               setEditingScreen(null);
               setModalMode('create');
             }}
-            className="text-xs px-2.5 py-1.5 rounded bg-agribank-green text-white hover:bg-green-700"
+            className="text-xs px-2.5 py-1.5 rounded bg-agribank-green text-white hover:bg-agribank-dark"
           >
             + Add
           </button>
@@ -148,7 +148,7 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
                 key={screen.id}
                 className={`p-3 rounded-lg border transition-colors ${
                   selectedId === screen.id
-                    ? 'border-agribank-green bg-green-50'
+                    ? 'border-agribank-green bg-red-50'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >

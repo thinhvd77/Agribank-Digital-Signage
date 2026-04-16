@@ -40,7 +40,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
   const resolutionError = useMemo(() => {
     if (!normalizedResolution) return null;
     if (isValidResolutionString(normalizedResolution)) return null;
-    return 'Resolution must follow WxH format, e.g. 1920x1080.';
+    return 'Độ phân giải phải theo định dạng WxH, ví dụ: 1920x1080.';
   }, [normalizedResolution]);
 
   const hasChanges = (screen?.resolution ?? '') !== (normalizedResolution || '');
@@ -57,7 +57,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
     onSuccess: () => {
       setFeedback({
         type: 'success',
-        message: 'Resolution saved successfully.',
+        message: 'Độ phân giải đã được lưu thành công.',
       });
       queryClient.invalidateQueries({ queryKey: ['screens'] });
       queryClient.invalidateQueries({ queryKey: ['screen', screenId] });
@@ -65,7 +65,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
     onError: (error: Error) => {
       setFeedback({
         type: 'error',
-        message: error.message || 'Failed to save resolution.',
+        message: error.message || 'Không thể lưu độ phân giải.',
       });
     },
   });
@@ -73,7 +73,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg border p-4">
-        <p className="text-sm text-gray-500">Loading screen settings...</p>
+        <p className="text-sm text-gray-500">Đang tải cài đặt màn hình...</p>
       </div>
     );
   }
@@ -81,7 +81,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
   if (isError || !screen) {
     return (
       <div className="bg-white rounded-lg border p-4">
-        <p className="text-sm text-red-600">Unable to load screen settings.</p>
+        <p className="text-sm text-red-600">Không thể tải cài đặt màn hình.</p>
       </div>
     );
   }
@@ -90,21 +90,21 @@ export default function ScreenSettings({ token, screenId }: Props) {
     <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-semibold">Screen Settings</h2>
+          <h2 className="text-lg font-semibold">Cài đặt màn hình</h2>
           <p className="text-sm text-gray-500">{screen.name}</p>
         </div>
         <button
           onClick={() => saveMutation.mutate()}
           disabled={saveMutation.isPending || !hasChanges || !!resolutionError}
-          className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+          className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
         >
-          {saveMutation.isPending ? 'Saving...' : 'Save Resolution'}
+          {saveMutation.isPending ? 'Đang lưu...' : 'Lưu Độ Phân Giải'}
         </button>
       </div>
 
       <div className="mt-4">
         <label htmlFor="screen-resolution" className="block text-sm font-medium text-gray-700 mb-1">
-          Resolution (WxH)
+          Độ Phân Giải (WxH)
         </label>
         <input
           id="screen-resolution"
@@ -118,7 +118,7 @@ export default function ScreenSettings({ token, screenId }: Props) {
           className="w-full border rounded px-3 py-2 text-sm"
         />
         <p className="text-xs text-gray-500 mt-1">
-          Leave blank to use full viewport fallback on the Player.
+          Để trống để sử dụng fallback viewport đầy đủ trên Player.
         </p>
         {resolutionError && (
           <p className="text-xs text-red-600 mt-1">{resolutionError}</p>

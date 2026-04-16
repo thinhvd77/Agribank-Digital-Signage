@@ -188,7 +188,7 @@ export default function PlaylistEditor({ token, profileId }: Props) {
           <button
             onClick={() => saveMutation.mutate(items)}
             disabled={saveMutation.isPending}
-            className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+            className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
           >
             {saveMutation.isPending ? 'Saving...' : 'Save Playlist'}
           </button>

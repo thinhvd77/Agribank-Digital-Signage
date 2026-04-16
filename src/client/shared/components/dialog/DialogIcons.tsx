@@ -4,10 +4,10 @@ import type { ToastVariant } from './toastStore';
 export const getVariantStyles = (variant: ToastVariant) => {
   const styles = {
     info: {
-      bgColor: '#e8f5ef',
-      accentColor: '#00723F',
-      darkColor: '#005a32',
-      shadowColor: '#00723F40',
+      bgColor: '#fae8ec',
+      accentColor: '#AE1C40',
+      darkColor: '#7A1230',
+      shadowColor: '#AE1C4040',
     },
     success: {
       bgColor: '#d4edda',
@@ -73,9 +73,9 @@ export function DialogIcon({ variant }: { variant: ToastVariant }) {
     default: // info
       return (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="16" stroke="#00723F" strokeWidth="2.5" fill="none"/>
-          <line x1="20" y1="12" x2="20" y2="14" stroke="#00723F" strokeWidth="2.5" strokeLinecap="round"/>
-          <line x1="20" y1="19" x2="20" y2="28" stroke="#00723F" strokeWidth="2.5" strokeLinecap="round"/>
+          <circle cx="20" cy="20" r="16" stroke="#AE1C40" strokeWidth="2.5" fill="none"/>
+          <line x1="20" y1="12" x2="20" y2="14" stroke="#AE1C40" strokeWidth="2.5" strokeLinecap="round"/>
+          <line x1="20" y1="19" x2="20" y2="28" stroke="#AE1C40" strokeWidth="2.5" strokeLinecap="round"/>
         </svg>
       );
   }
@@ -121,8 +121,8 @@ export function ToastIcon({ variant }: { variant: ToastVariant }) {
     default: // info
       return (
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <circle cx="10" cy="6" r="1" fill="#00723F"/>
-          <line x1="10" y1="9" x2="10" y2="14" stroke="#00723F" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="10" cy="6" r="1" fill="#AE1C40"/>
+          <line x1="10" y1="9" x2="10" y2="14" stroke="#AE1C40" strokeWidth="2" strokeLinecap="round"/>
         </svg>
       );
   }

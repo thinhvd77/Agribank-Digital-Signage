@@ -82,7 +82,7 @@ export default function LoginForm({ onLogin }: Props) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-agribank-green text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50"
+            className="w-full bg-agribank-green text-white py-2 px-4 rounded-md hover:bg-agribank-dark disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

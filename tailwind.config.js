@@ -13,11 +13,11 @@ export default {
       },
       colors: {
         agribank: {
-          green: '#00723F',
-          dark: '#004d2a',
+          green: '#AE1C40',
+          dark: '#7A1230',
           gold: '#D4AF37',
           goldLight: '#F4E4A6',
-          red: '#A62C2C',
+          red: '#AE1C40',
           cream: '#FAF8F5',
         },
       },
@@ -56,8 +56,8 @@ export default {
         },
       },
       boxShadow: {
-        'dialog': '0 25px 50px -12px rgba(0, 34, 19, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.1)',
-        'dialog-hover': '0 35px 60px -15px rgba(0, 34, 19, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.2)',
+        'dialog': '0 25px 50px -12px rgba(60, 10, 20, 0.35), 0 0 0 1px rgba(212, 175, 55, 0.1)',
+        'dialog-hover': '0 35px 60px -15px rgba(60, 10, 20, 0.45), 0 0 0 1px rgba(212, 175, 55, 0.2)',
         'glow-gold': '0 0 40px -10px rgba(212, 175, 55, 0.5)',
       },
     },
