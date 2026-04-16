@@ -19,11 +19,15 @@ pnpm dev
 # Start only frontend (Vite on port 5173)
 pnpm dev:client
 
-# Start only backend (Express on port 3001)
+# Start only backend (Express on port 3000)
 pnpm dev:server
 
 # Build for production
 pnpm build
+
+# TypeScript type-checking
+pnpm build:check      # Check server types (tsconfig.server.json)
+node_modules/.bin/tsc --noEmit  # Check client types (tsconfig.json)
 
 # Database
 pnpm db:migrate    # Run Prisma migrations
@@ -44,9 +48,10 @@ Vite builds both entries via `rollupOptions.input`.
 ### Backend Structure
 
 Express server in `src/server/`:
-- Routes: `/api/health`, `/api/auth`, `/api/screens`
+- Routes: `/api/health`, `/api/auth`, `/api/screens`, `/api/profiles`, `/api/media`
 - Prisma ORM with PostgreSQL adapter (`@prisma/adapter-pg`)
 - JWT auth via `authMiddleware`
+- WebSocket (Socket.io) for real-time playlist/status updates
 
 ### Path Aliases
 
@@ -66,11 +71,12 @@ Socket.io for:
 
 ### Database Schema
 
-Four tables in PostgreSQL (see `prisma/schema.prisma`):
+Five tables in PostgreSQL (see `prisma/schema.prisma`):
 - `users` - Admin authentication
 - `screens` - LED screen configurations
-- `media` - Uploaded video/image files
-- `playlist_items` - Screen-to-media ordering
+- `profiles` - Playlist containers (one or more per screen)
+- `media` - Uploaded video/image files with auto-extracted duration
+- `playlist_items` - Media + duration mapping per profile
 
 ### CORS Configuration
 
@@ -78,7 +84,20 @@ Restricted to LAN subnet pattern: `192.168.x.x`, `localhost`, `127.0.0.1`
 
 ## Key Technical Details
 
-- **TypeScript**: Strict mode enabled with two tsconfigs (client uses bundler resolution, server uses NodeNext)
+- **TypeScript**: Strict mode enabled with two tsconfigs:
+  - Client (`tsconfig.json`): bundler resolution, JSX support
+  - Server (`tsconfig.server.json`): Node ES modules, CommonJS compat
 - **Player**: Runs fullscreen in Chrome Kiosk mode, receives screenId from URL query param `?screen=uuid`
+  - Video/image duration: timer races with video `onEnded` — whichever fires first advances to next item
+  - Images advance only by timer (set via `PlaylistEditor`)
+  - Videos with duration < actual length get cut early; duration > length has no effect
 - **Media storage**: Files served from `/uploads` directory, proxied through Express
+  - Video duration auto-extracted via HTML5 `<video>` metadata on upload & back-filled for existing videos
 - **State management**: Zustand for client state, TanStack Query for server state
+
+## Gotchas & Non-Obvious Patterns
+
+- **TypeScript check**: Run `pnpm build:check` (server only) OR `node_modules/.bin/tsc --noEmit` (client) separately; no unified command yet
+- **Port mismatch in dev**: Admin (Vite :5173) and Player (built-in :3000) on different ports during dev; production unified via Express
+- **Player URL display**: Admin dashboard shows player URL under "Screen Settings" for easy copying to LED machines
+- **Database profiles**: Each screen can have multiple profiles (e.g., "Morning", "Afternoon"); only one active at a time
