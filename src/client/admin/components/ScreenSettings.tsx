@@ -19,6 +19,19 @@ export default function ScreenSettings({ token, screenId }: Props) {
   const queryClient = useQueryClient();
   const [resolutionInput, setResolutionInput] = useState('');
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const playerUrl = `${window.location.origin}/player.html?screen=${screenId}`;
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(playerUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard API unavailable (e.g., non-HTTPS context) — user can select & copy manually
+    }
+  };
 
   const {
     data: screen,
@@ -100,6 +113,32 @@ export default function ScreenSettings({ token, screenId }: Props) {
         >
           {saveMutation.isPending ? 'Đang lưu...' : 'Lưu Độ Phân Giải'}
         </button>
+      </div>
+
+      <div className="mt-4">
+        <label htmlFor="player-url" className="block text-sm font-medium text-gray-700 mb-1">
+          URL Player
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="player-url"
+            type="text"
+            value={playerUrl}
+            readOnly
+            onFocus={(event) => event.currentTarget.select()}
+            className="flex-1 border rounded px-3 py-2 text-sm bg-gray-50 font-mono"
+          />
+          <button
+            type="button"
+            onClick={handleCopyUrl}
+            className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark text-sm whitespace-nowrap"
+          >
+            {copied ? 'Đã sao chép' : 'Sao chép'}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">
+          Mở URL này trong Chrome trên máy LED để chạy playlist của màn hình.
+        </p>
       </div>
 
       <div className="mt-4">
