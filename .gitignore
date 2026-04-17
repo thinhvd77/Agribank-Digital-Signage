@@ -4,6 +4,7 @@ uploads/*
 !uploads/.gitkeep
 .env
 *.log
+logs/
 .env.local
 .env.*.local
 

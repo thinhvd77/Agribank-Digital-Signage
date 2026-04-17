@@ -10,6 +10,7 @@
     "build": "vite build && esbuild src/server/index.ts --bundle --platform=node --target=node20 --outfile=dist/server/index.js --format=esm --packages=external",
     "build:check": "tsc -p tsconfig.server.json",
     "start": "node dist/server/index.js",
+    "deploy": "pnpm exec prisma migrate deploy && pnpm exec prisma generate && pnpm run build",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "prisma studio"

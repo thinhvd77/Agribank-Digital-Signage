@@ -1,0 +1,54 @@
+# Nginx reverse proxy config for Agribank Digital Signage
+# Place this inside the `http { ... }` block in nginx.conf, or include as a site.
+# On Windows: C:\nginx\conf\nginx.conf (or conf\sites-enabled\ if using includes).
+
+upstream agribank_signage {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    server_name _;  # replace with LAN IP or hostname, e.g. 192.168.1.10
+
+    # Allow large video uploads (matches MAX_FILE_SIZE_VIDEO = 500MB)
+    client_max_body_size 600M;
+
+    # Logs
+    access_log logs/agribank-access.log;
+    error_log  logs/agribank-error.log;
+
+    # Socket.io WebSocket endpoint — must be BEFORE the catch-all `/`
+    location /socket.io/ {
+        proxy_pass http://agribank_signage;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 86400s;
+    }
+
+    # Serve uploaded media directly from disk (faster than proxying through Node)
+    # Adjust the `alias` path to match your deployment location.
+    location /uploads/ {
+        alias C:/agribank-signage/uploads/;
+        access_log off;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
+    # Everything else → Node backend (API + SPA assets)
+    location / {
+        proxy_pass http://agribank_signage;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 300s;
+    }
+}

@@ -53,7 +53,7 @@ pnpm dev
 
 - Admin Dashboard: http://localhost:5173
 - Player: http://localhost:5173/player.html?screen=<screen-id>
-- API: http://localhost:3001
+- API: http://localhost:3000
 
 Default login: `admin` / `admin123`
 
@@ -143,7 +143,7 @@ chromium --kiosk --noerrdialogs --disable-infobars \
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL connection string | - |
-| `PORT` | Server port | 3001 |
+| `PORT` | Server port | 3000 |
 | `NODE_ENV` | Environment | development |
 | `JWT_SECRET` | JWT signing secret | - |
 | `JWT_EXPIRES_IN` | Token expiration | 24h |
