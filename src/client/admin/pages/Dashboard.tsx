@@ -52,7 +52,7 @@ export default function Dashboard({ token, onLogout }: Props) {
       </header>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {/* Sidebar */}
         <aside className="w-64 bg-gray-50 border-r overflow-y-auto">
           <ScreenList
@@ -63,7 +63,7 @@ export default function Dashboard({ token, onLogout }: Props) {
         </aside>
 
         {/* Content area */}
-        <main className="flex-1 flex flex-col overflow-hidden p-6 gap-4">
+        <main className="flex-1 flex overflow-y-auto flex-col p-6 gap-4 min-h-0">
           {selectedScreenId ? (
             <>
               {/* Top section: screen settings + profile tabs */}
@@ -78,20 +78,20 @@ export default function Dashboard({ token, onLogout }: Props) {
               </div>
 
               {/* Bottom section: playlist (left) + media library (right) */}
-              <div className="flex-1 flex gap-4 overflow-hidden min-h-0">
+              <div className="flex gap-4 items-start">
                 {/* Playlist editor — narrow fixed column */}
-                <div className="w-80 flex-shrink-0 overflow-y-auto">
+                <div className="w-80 flex-shrink-0">
                   {selectedProfileId ? (
                     <PlaylistEditor token={token} profileId={selectedProfileId} />
                   ) : (
-                    <div className="bg-white rounded-lg border p-4 text-gray-500 h-full flex items-center justify-center text-center text-sm">
+                    <div className="bg-white rounded-lg border p-4 text-gray-500 flex items-center justify-center text-center text-sm">
                       Chọn một profile để quản lý playlist.
                     </div>
                   )}
                 </div>
 
                 {/* Media library — fills remaining space */}
-                <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex-1 min-w-0">
                   <MediaLibrary
                     token={token}
                     selectedProfileId={selectedProfileId}

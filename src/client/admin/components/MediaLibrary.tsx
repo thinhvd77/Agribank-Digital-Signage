@@ -106,7 +106,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
   };
 
   return (
-    <div className="bg-white rounded-lg border p-4 h-full flex flex-col">
+    <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Media Library</h2>
         <div>
@@ -127,7 +127,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
+      <div>
         {isLoading ? (
           <p className="text-gray-500">Loading...</p>
         ) : (
