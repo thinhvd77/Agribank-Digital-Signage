@@ -14,6 +14,7 @@ export default {
       fontSize: {
         'sm': '12px',
         'md': '16px',
+        'mlg': '20px',
         'lg': '34px',
       },
       colors: {

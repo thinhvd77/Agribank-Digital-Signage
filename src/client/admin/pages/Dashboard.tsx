@@ -36,16 +36,15 @@ export default function Dashboard({ token, onLogout }: Props) {
   return (
     <div className="h-screen flex flex-col font-body">
       {/* Header */}
-      <header className="bg-agribank-green text-white px-6 py-4 flex items-center justify-between">
+      <header className="bg-agribank-green text-white px-3 py-2 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 flex items-center justify-center">
-            <img src="/logo.png" alt="Agribank Logo" />
+          <div className="w-60 h-10 flex items-center justify-center">
+            <img src="/full-logo.png" alt="Agribank Logo" />
           </div>
-          <h1 className="text-lg font-display font-bold">AGRIBANK</h1>
         </div>
         <button
           onClick={handleLogout}
-          className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200
+          className="px-4 py-2 text-md font-medium rounded-lg transition-all duration-200
                    hover:bg-white/10 active:scale-[0.98]"
         >
           Đăng xuất
@@ -112,8 +111,8 @@ export default function Dashboard({ token, onLogout }: Props) {
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              Select a screen to manage its playlist
+            <div className="text-mlg flex-1 flex items-center justify-center">
+              Chọn một màn hình để xem và quản lý nội dung hiển thị.
             </div>
           )}
         </main>

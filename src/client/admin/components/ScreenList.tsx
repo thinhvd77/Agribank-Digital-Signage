@@ -131,15 +131,15 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
               setEditingScreen(null);
               setModalMode('create');
             }}
-            className="text-xs px-2.5 py-1.5 rounded bg-agribank-green text-white hover:bg-agribank-dark"
+            className="text-sm px-2.5 py-1.5 rounded bg-agribank-green text-white hover:bg-agribank-dark"
           >
-            + Add
+            + Thêm màn hình
           </button>
         </div>
 
         {screens.length === 0 ? (
           <div className="rounded-lg border border-dashed border-gray-300 p-3 text-sm text-gray-500">
-            No screens found. Click <span className="font-semibold">Add</span> to create one.
+            Không tìm thấy màn hình nào. Click <span className="font-semibold">Thêm màn hình</span> để tạo một màn hình mới.
           </div>
         ) : (
           <div className="space-y-2">
@@ -169,7 +169,7 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
                       <p className="text-sm text-gray-500">{screen.location}</p>
                     )}
                     <p className="text-xs text-gray-400">
-                      Resolution: {screen.resolution || 'Not set'}
+                      Độ phân giải: {screen.resolution || 'Not set'}
                     </p>
                   </div>
                 </button>
@@ -183,14 +183,14 @@ export default function ScreenList({ token, selectedId, onSelect }: Props) {
                     disabled={isMutating}
                     className="px-2.5 py-1 text-xs border rounded hover:bg-gray-50 disabled:opacity-50"
                   >
-                    Edit
+                    Chỉnh sửa
                   </button>
                   <button
                     onClick={() => handleDeleteScreen(screen)}
                     disabled={isMutating}
                     className="px-2.5 py-1 text-xs border border-red-200 text-red-700 rounded hover:bg-red-50 disabled:opacity-50"
                   >
-                    Delete
+                    Xóa
                   </button>
                 </div>
               </div>
