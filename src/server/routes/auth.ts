@@ -32,11 +32,17 @@ router.post('/login', async (req: Request, res: Response) => {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 
+  if (user.role === 'screen_manager' && !user.screenId) {
+    return res.status(403).json({
+      message: 'Tài khoản chưa được gán màn hình, liên hệ quản trị viên',
+    });
+  }
+
   const secret = process.env.JWT_SECRET || 'fallback-secret';
   const expiresIn = (process.env.JWT_EXPIRES_IN || '24h') as jwt.SignOptions['expiresIn'];
 
   const token = jwt.sign(
-    { userId: user.id, isAdmin: user.isAdmin },
+    { userId: user.id, role: user.role, screenId: user.screenId },
     secret,
     { expiresIn }
   );
@@ -46,7 +52,8 @@ router.post('/login', async (req: Request, res: Response) => {
     user: {
       id: user.id,
       username: user.username,
-      isAdmin: user.isAdmin,
+      role: user.role,
+      screenId: user.screenId,
     },
   });
 });
@@ -54,7 +61,7 @@ router.post('/login', async (req: Request, res: Response) => {
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   const user = await prisma.user.findUnique({
     where: { id: req.userId },
-    select: { id: true, username: true, isAdmin: true },
+    select: { id: true, username: true, role: true, screenId: true },
   });
 
   if (!user) {
