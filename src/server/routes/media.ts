@@ -7,6 +7,7 @@ import path from 'path';
 import fs from 'fs';
 import crypto from 'crypto';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { requireAdmin } from '../middleware/requireRole';
 
 const router = Router();
 
@@ -197,7 +198,7 @@ router.patch('/:id/duration', authMiddleware, async (req: AuthRequest, res: Resp
 });
 
 // DELETE /api/media/:id - Delete media
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: AuthRequest, res: Response) => {
   const mediaId = getMediaId(req.params.id);
   if (!mediaId) {
     return res.status(400).json({ message: 'Invalid media id' });
