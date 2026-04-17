@@ -8,8 +8,13 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ['"Playfair Display"', 'serif'],
-        body: ['"Source Sans 3"', 'system-ui', 'sans-serif'],
+        display: ['"Myriad Pro"', 'system-ui', 'sans-serif'],
+        body: ['"Myriad Pro"', 'system-ui', 'sans-serif'],
+      },
+      fontSize: {
+        'sm': '12px',
+        'md': '16px',
+        'lg': '34px',
       },
       colors: {
         agribank: {

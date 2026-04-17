@@ -21,12 +21,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/api': 'http://localhost:3001',
       '/socket.io': {
-        target: 'http://localhost:3000',
+        target: 'http://localhost:3001',
         ws: true,
       },
-      '/uploads': 'http://localhost:3000',
+      '/uploads': 'http://localhost:3001',
     },
   },
 });

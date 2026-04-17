@@ -38,14 +38,10 @@ export default function Dashboard({ token, onLogout }: Props) {
       {/* Header */}
       <header className="bg-agribank-green text-white px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-agribank-gold/20 flex items-center justify-center border border-agribank-gold/30">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <div className="w-10 h-10 flex items-center justify-center">
+            <img src="/logo.png" alt="Agribank Logo" />
           </div>
-          <h1 className="text-xl font-display font-bold">Agribank Digital Signage</h1>
+          <h1 className="text-lg font-display font-bold">AGRIBANK</h1>
         </div>
         <button
           onClick={handleLogout}
