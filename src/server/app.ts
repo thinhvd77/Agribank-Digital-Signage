@@ -8,6 +8,7 @@ import authRouter from './routes/auth';
 import screensRouter from './routes/screens';
 import profilesRouter from './routes/profiles';
 import mediaRouter from './routes/media';
+import usersRouter from './routes/users';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 const app = express();
@@ -49,6 +50,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/screens', screensRouter);
 app.use('/api/profiles', profilesRouter);
 app.use('/api/media', mediaRouter);
+app.use('/api/users', usersRouter);
 
 // Serve static frontend in production
 const distPath = path.join(process.cwd(), 'dist');
