@@ -126,6 +126,8 @@ agribank-digital-signage/
 
 Target stack: **PM2 + Nginx + PostgreSQL** on Windows Server. Full step-by-step guide (firewall, auto-start on boot, updates, backup, troubleshooting) lives in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
+For **air-gapped/offline** environments using prebuilt Docker images, see [`docs/DEPLOYMENT_OFFLINE_DOCKER.md`](docs/DEPLOYMENT_OFFLINE_DOCKER.md).
+
 ### Server prerequisites
 
 - Node.js 20+, pnpm 10+

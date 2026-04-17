@@ -3,6 +3,7 @@ dist/
 uploads/*
 !uploads/.gitkeep
 .env
+.env.docker.offline
 *.log
 logs/
 .env.local

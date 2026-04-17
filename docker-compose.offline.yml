@@ -1,0 +1,25 @@
+services:
+  app:
+    image: ${APP_IMAGE:-agribank-digital-signage:1.0.0}
+    container_name: agribank-signage-app
+    restart: unless-stopped
+    command: sh -c "pnpm exec prisma migrate deploy && node dist/server/index.js"
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.docker.offline
+    volumes:
+      - ./uploads:/app/uploads
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
