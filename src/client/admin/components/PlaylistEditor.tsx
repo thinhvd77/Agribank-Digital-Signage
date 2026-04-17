@@ -190,7 +190,7 @@ export default function PlaylistEditor({ token, profileId }: Props) {
             disabled={saveMutation.isPending}
             className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
           >
-            {saveMutation.isPending ? 'Đang lưu...' : 'Lưu Danh sách phát'}
+            {saveMutation.isPending ? 'Đang lưu...' : 'Lưu'}
           </button>
         )}
       </div>

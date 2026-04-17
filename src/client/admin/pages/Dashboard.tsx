@@ -80,7 +80,7 @@ export default function Dashboard({ token, onLogout }: Props) {
               {/* Bottom section: playlist (left) + media library (right) */}
               <div className="flex gap-4 items-start">
                 {/* Playlist editor — narrow fixed column */}
-                <div className="w-100 flex-shrink-0">
+                <div className="w-90 flex-shrink-0">
                   {selectedProfileId ? (
                     <PlaylistEditor token={token} profileId={selectedProfileId} />
                   ) : (
