@@ -17,7 +17,21 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
+  const [previewMedia, setPreviewMedia] = useState<Media | null>(null);
   const { error, success, confirm } = useDialog();
+
+  useEffect(() => {
+    if (!previewMedia) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setPreviewMedia(null);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [previewMedia]);
 
   const { data, isLoading } = useQuery({
     queryKey: ['media'],
@@ -108,7 +122,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
   return (
     <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Media Library</h2>
+        <h2 className="text-lg font-semibold">Thư viện media</h2>
         <div>
           <input
             ref={fileInputRef}
@@ -122,14 +136,14 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
             disabled={uploading}
             className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
           >
-            {uploading ? 'Uploading...' : 'Upload Media'}
+            {uploading ? 'Đang tải lên...' : 'Tải lên Media'}
           </button>
         </div>
       </div>
 
       <div>
         {isLoading ? (
-          <p className="text-gray-500">Loading...</p>
+          <p className="text-gray-500">Đang tải...</p>
         ) : (
           <div className="grid grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {data?.items.map((media) => (
@@ -141,13 +155,18 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                   {media.fileType === 'video' ? (
                     <video
                       src={media.filePath}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      onClick={() => setPreviewMedia(media)}
                     />
                   ) : (
                     <img
                       src={media.filePath}
                       alt={media.originalName}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover cursor-pointer"
+                      onClick={() => setPreviewMedia(media)}
                     />
                   )}
                 </div>
@@ -160,6 +179,12 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                   </p>
                 </div>
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => setPreviewMedia(media)}
+                    className="bg-gray-800 text-white px-3 py-1 rounded text-sm hover:bg-gray-900 transition-colors"
+                  >
+                    Xem trước
+                  </button>
                   {onAddToPlaylist && (
                     <button
                       onClick={() => {
@@ -171,7 +196,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                       }}
                       className="bg-agribank-green text-white px-3 py-1 rounded text-sm hover:bg-agribank-dark transition-colors"
                     >
-                      Add
+                      Thêm
                     </button>
                   )}
                   <button
@@ -190,7 +215,7 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                     }}
                     className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
                   >
-                    Delete
+                    Xóa
                   </button>
                 </div>
               </div>
@@ -198,6 +223,52 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
           </div>
         )}
       </div>
+
+      {previewMedia && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setPreviewMedia(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Media preview"
+        >
+          <div
+            className="bg-white rounded-lg shadow-xl w-full max-w-5xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-4 py-3 border-b flex items-center justify-between gap-3">
+              <p className="font-medium truncate" title={previewMedia.originalName}>
+                {previewMedia.originalName}
+              </p>
+              <button
+                onClick={() => setPreviewMedia(null)}
+                className="text-gray-600 hover:text-gray-900 px-2 py-1 rounded"
+              >
+                Đóng
+              </button>
+            </div>
+            <div className="bg-black">
+              {previewMedia.fileType === 'video' ? (
+                <video
+                  key={previewMedia.id}
+                  src={previewMedia.filePath}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full max-h-[75vh]"
+                />
+              ) : (
+                <img
+                  key={previewMedia.id}
+                  src={previewMedia.filePath}
+                  alt={previewMedia.originalName}
+                  className="w-full max-h-[75vh] object-contain"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

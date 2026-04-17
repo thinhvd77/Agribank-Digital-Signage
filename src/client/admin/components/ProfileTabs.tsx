@@ -151,7 +151,7 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
   if (isLoading) {
     return (
       <div className="bg-white rounded-lg border p-4">
-        <p className="text-sm text-gray-500">Loading profiles...</p>
+        <p className="text-sm text-gray-500">Đang tải...</p>
       </div>
     );
   }
@@ -159,7 +159,7 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
   if (isError) {
     return (
       <div className="bg-white rounded-lg border p-4">
-        <p className="text-sm text-red-600">Failed to load profiles.</p>
+        <p className="text-sm text-red-600">Đã xảy ra lỗi khi tải profiles.</p>
       </div>
     );
   }
@@ -178,7 +178,7 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
       </div>
 
       {profiles.length === 0 ? (
-        <p className="text-sm text-gray-500">No profiles found for this screen.</p>
+        <p className="text-sm text-gray-500">Không tìm thấy profile nào cho màn hình này.</p>
       ) : (
         <>
           <div className="flex flex-wrap gap-2">
@@ -216,21 +216,21 @@ export default function ProfileTabs({ token, screenId, selectedProfileId, onSele
                       disabled={isMutating || selected.isActive}
                       className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Set Active
+                      Kích hoạt
                     </button>
                     <button
                       onClick={() => handleRenameProfile(selected)}
                       disabled={isMutating}
                       className="px-3 py-1.5 text-sm border rounded hover:bg-gray-50 disabled:opacity-50"
                     >
-                      Rename
+                      Đổi tên
                     </button>
                     <button
                       onClick={() => handleDeleteProfile(selected)}
                       disabled={isMutating || profiles.length <= 1}
                       className="px-3 py-1.5 text-sm border border-red-200 text-red-700 rounded hover:bg-red-50 disabled:opacity-50"
                     >
-                      Delete
+                      Xóa
                     </button>
                   </>
                 );

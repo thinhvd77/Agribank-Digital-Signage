@@ -62,7 +62,7 @@ function SortableItem({ item, onRemove, onDurationChange }: SortableItemProps) {
         <p className="text-xs text-gray-500">{item.media.fileType}</p>
       </div>
       <div className="flex items-center gap-2">
-        <label className="text-xs text-gray-500">Duration:</label>
+        <label className="text-xs text-gray-500">Thời lượng:</label>
         <input
           type="number"
           min="1"
@@ -183,21 +183,21 @@ export default function PlaylistEditor({ token, profileId }: Props) {
   return (
     <div className="bg-white rounded-lg border p-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">Current Playlist</h2>
+        <h2 className="text-lg font-semibold">Danh sách phát</h2>
         {hasChanges && (
           <button
             onClick={() => saveMutation.mutate(items)}
             disabled={saveMutation.isPending}
             className="bg-agribank-green text-white px-4 py-2 rounded hover:bg-agribank-dark disabled:opacity-50"
           >
-            {saveMutation.isPending ? 'Saving...' : 'Save Playlist'}
+            {saveMutation.isPending ? 'Đang lưu...' : 'Lưu Danh sách phát'}
           </button>
         )}
       </div>
 
       {items.length === 0 ? (
         <p className="text-gray-500 text-center py-8">
-          No items in playlist. Add media from the library below.
+          Chưa có media nào trong danh sách phát. Thêm media từ thư viện bên phải.
         </p>
       ) : (
         <DndContext

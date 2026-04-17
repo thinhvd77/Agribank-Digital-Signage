@@ -80,12 +80,12 @@ export default function Dashboard({ token, onLogout }: Props) {
               {/* Bottom section: playlist (left) + media library (right) */}
               <div className="flex gap-4 items-start">
                 {/* Playlist editor — narrow fixed column */}
-                <div className="w-80 flex-shrink-0">
+                <div className="w-100 flex-shrink-0">
                   {selectedProfileId ? (
                     <PlaylistEditor token={token} profileId={selectedProfileId} />
                   ) : (
                     <div className="bg-white rounded-lg border p-4 text-gray-500 flex items-center justify-center text-center text-sm">
-                      Chọn một profile để quản lý playlist.
+                      Chọn một profile để quản lý danh sách phát.
                     </div>
                   )}
                 </div>

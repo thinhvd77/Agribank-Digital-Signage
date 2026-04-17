@@ -38,6 +38,29 @@ const ALLOWED_MIMES: Record<string, 'video' | 'image'> = {
   'image/webp': 'image',
 };
 
+function normalizeFilename(value: string): string {
+  if (!value) return value;
+
+  // Many multipart uploads (multer/busboy) surface UTF-8 filenames as latin1,
+  // causing mojibake like "tÃªn file" instead of "tên file".
+  // Heuristic: only decode when mojibake markers are present.
+  const hasMojibake = /Ã.|Â.|áº|Ä|Å/.test(value);
+  if (!hasMojibake) return value;
+
+  try {
+    return Buffer.from(value, 'latin1').toString('utf8');
+  } catch {
+    return value;
+  }
+}
+
+function normalizeMediaOutput<T extends { originalName: string }>(item: T): T {
+  return {
+    ...item,
+    originalName: normalizeFilename(item.originalName),
+  };
+}
+
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     if (!fs.existsSync(UPLOAD_DIR)) {
@@ -46,7 +69,8 @@ const storage = multer.diskStorage({
     cb(null, UPLOAD_DIR);
   },
   filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
+    const normalizedOriginalName = normalizeFilename(file.originalname);
+    const ext = path.extname(normalizedOriginalName) || path.extname(file.originalname);
     const hash = crypto.randomBytes(16).toString('hex');
     cb(null, `${hash}${ext}`);
   },
@@ -84,10 +108,12 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   ]);
 
   res.json({
-    items: items.map((item) => ({
-      ...item,
-      fileSize: Number(item.fileSize),
-    })),
+    items: items.map((item) =>
+      normalizeMediaOutput({
+        ...item,
+        fileSize: Number(item.fileSize),
+      })
+    ),
     total,
     page,
     limit,
@@ -122,7 +148,7 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req: AuthRe
   const media = await prisma.media.create({
     data: {
       filename: file.filename,
-      originalName: file.originalname,
+      originalName: normalizeFilename(file.originalname),
       filePath: `/uploads/${file.filename}`,
       fileType,
       fileSize: BigInt(file.size),
@@ -131,10 +157,12 @@ router.post('/upload', authMiddleware, upload.single('file'), async (req: AuthRe
     },
   });
 
-  res.status(201).json({
-    ...media,
-    fileSize: Number(media.fileSize),
-  });
+  res.status(201).json(
+    normalizeMediaOutput({
+      ...media,
+      fileSize: Number(media.fileSize),
+    })
+  );
 });
 
 // PATCH /api/media/:id/duration - Update video duration (used for back-filling)

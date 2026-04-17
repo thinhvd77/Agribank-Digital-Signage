@@ -44,22 +44,22 @@ export default function ScreenCrudModal({
   const resolutionError = useMemo(() => {
     if (!normalizedResolution) return null;
     if (isValidResolutionString(normalizedResolution)) return null;
-    return 'Resolution must follow WxH format, e.g. 1920x1080.';
+    return 'Độ phân giải phải theo định dạng WxH, ví dụ: 1920x1080.';
   }, [normalizedResolution]);
 
   if (!isOpen) {
     return null;
   }
 
-  const title = mode === 'create' ? 'Add Screen' : 'Edit Screen';
-  const submitText = mode === 'create' ? 'Create Screen' : 'Save Changes';
+  const title = mode === 'create' ? 'Thêm Màn Hình' : 'Chỉnh Sửa Màn Hình';
+  const submitText = mode === 'create' ? 'Tạo Màn Hình' : 'Lưu Thay Đổi';
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
 
     const normalizedName = name.trim();
     if (!normalizedName) {
-      setNameError('Name is required.');
+      setNameError('Tên là bắt buộc.');
       return;
     }
 
@@ -85,7 +85,7 @@ export default function ScreenCrudModal({
           <div className="px-5 py-4 space-y-4">
             <div>
               <label htmlFor="screen-name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name <span className="text-red-600">*</span>
+                Tên <span className="text-red-600">*</span>
               </label>
               <input
                 id="screen-name"
@@ -104,7 +104,7 @@ export default function ScreenCrudModal({
 
             <div>
               <label htmlFor="screen-location" className="block text-sm font-medium text-gray-700 mb-1">
-                Location
+                Vị Trí
               </label>
               <input
                 id="screen-location"
@@ -118,7 +118,7 @@ export default function ScreenCrudModal({
 
             <div>
               <label htmlFor="screen-resolution-modal" className="block text-sm font-medium text-gray-700 mb-1">
-                Resolution (WxH)
+                Độ Phân Giải (WxH)
               </label>
               <input
                 id="screen-resolution-modal"
@@ -129,7 +129,7 @@ export default function ScreenCrudModal({
                 placeholder="1920x1080"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Leave blank to let Player use viewport fallback.
+                Để trống để Player sử dụng kích thước màn hình hiện tại.
               </p>
               {resolutionError && <p className="text-xs text-red-600 mt-1">{resolutionError}</p>}
             </div>
@@ -142,14 +142,14 @@ export default function ScreenCrudModal({
               disabled={isSubmitting}
               className="px-4 py-2 rounded border border-gray-300 text-sm hover:bg-gray-50 disabled:opacity-50"
             >
-              Cancel
+              Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !!resolutionError}
               className="bg-agribank-green text-white px-4 py-2 rounded text-sm hover:bg-agribank-dark disabled:opacity-50"
             >
-              {isSubmitting ? 'Saving...' : submitText}
+              {isSubmitting ? 'Đang lưu...' : submitText}
             </button>
           </div>
         </form>
