@@ -9,7 +9,7 @@ upstream agribank_signage {
 
 server {
     listen 80;
-    server_name _;  # replace with LAN IP or hostname, e.g. 192.168.1.10
+    server_name _;  # replace with LAN IP or hostname, e.g. 10.190.1.10
 
     # Allow large video uploads (matches MAX_FILE_SIZE_VIDEO = 500MB)
     client_max_body_size 600M;

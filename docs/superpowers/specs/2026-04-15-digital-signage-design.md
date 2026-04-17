@@ -422,7 +422,7 @@ src/
 ```javascript
 // Only allow requests from LAN subnet
 cors({
-  origin: /^https?:\/\/(192\.168\.\d{1,3}\.\d{1,3}|localhost|127\.0\.0\.1)(:\d+)?$/,
+  origin: /^https?:\/\/(10\.190\.\d{1,3}\.\d{1,3}|localhost|127\.0\.0\.1)(:\d+)?$/,
   credentials: true
 })
 ```
@@ -475,7 +475,7 @@ MAX_FILE_SIZE_VIDEO="524288000"    # 500MB in bytes
 MAX_FILE_SIZE_IMAGE="10485760"      # 10MB in bytes
 
 # CORS
-ALLOWED_ORIGINS="http://localhost:3000,http://192.168.1.*"
+ALLOWED_ORIGINS="http://localhost:3000,http://10.190.1.*"
 ```
 
 ## 12. Deployment

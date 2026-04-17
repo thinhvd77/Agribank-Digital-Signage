@@ -87,7 +87,7 @@ This registers PM2 as a Windows service so the app survives reboots.
 ## 6. Configure Nginx
 
 Copy `nginx.conf.example` into your Nginx config. Edit:
-- `server_name` → the server's LAN IP (e.g. `192.168.1.10`)
+- `server_name` → the server's LAN IP (e.g. `10.190.1.10`)
 - `alias C:/agribank-signage/uploads/` → match your install path (keep the trailing slash)
 
 Test and reload:
@@ -115,7 +115,7 @@ Open port 80 on the Windows Defender Firewall for the LAN:
 ```powershell
 New-NetFirewallRule -DisplayName "Agribank Signage HTTP" `
   -Direction Inbound -Protocol TCP -LocalPort 80 `
-  -RemoteAddress 192.168.0.0/16 -Action Allow
+  -RemoteAddress 10.190.0.0/16 -Action Allow
 ```
 
 ## 8. Verify deployment
@@ -161,7 +161,7 @@ Critical data to back up regularly:
 
 ## Troubleshooting
 
-**Players can't reach server:** verify firewall rule + CORS allowlist in `src/server/app.ts` matches your LAN subnet (currently `192.168.x.x`).
+**Players can't reach server:** verify firewall rule + CORS allowlist in `src/server/app.ts` matches your LAN subnet (currently `10.190.x.x`).
 
 **WebSocket not connecting:** Nginx must pass `Upgrade` + `Connection` headers on `/socket.io/` — see `nginx.conf.example`.
 

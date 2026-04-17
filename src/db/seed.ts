@@ -12,70 +12,21 @@ if (!databaseUrl) {
 
 const adapter = new PrismaPg(new Pool({ connectionString: databaseUrl }));
 const prisma = new PrismaClient({ adapter });
-const prismaWithProfiles = prisma as PrismaClient & {
-  profile: {
-    findFirst: (args: unknown) => Promise<{ id: string } | null>;
-    create: (args: unknown) => Promise<{ id: string }>;
-  };
-};
 
 async function main() {
-  const passwordHash = await bcrypt.hash('admin123', 10);
+  const passwordHash = await bcrypt.hash('Dientoan@6421', 10);
 
   await prisma.user.upsert({
-    where: { username: 'admin' },
+    where: { username: 'quantri' },
     update: {},
     create: {
-      username: 'admin',
+      username: 'quantri',
       passwordHash,
       role: 'admin',
     },
   });
 
-  const screens = [
-    { name: 'Chi nhanh Ha Noi', location: 'Tang 1, sanh chinh', resolution: '1920x1080' },
-    { name: 'Chi nhanh Ho Chi Minh', location: 'Tang 2, khu vuc giao dich', resolution: '1920x1080' },
-    { name: 'Chi nhanh Da Nang', location: 'Tang 1, loi vao', resolution: '1920x1080' },
-  ];
-
-  for (const screenData of screens) {
-    const existingScreen = await prisma.screen.findFirst({
-      where: {
-        name: screenData.name,
-        location: screenData.location,
-        deletedAt: null,
-      },
-    });
-
-    const screen = existingScreen ?? await prisma.screen.create({
-      data: screenData,
-    });
-
-    let defaultProfile = await prismaWithProfiles.profile.findFirst({
-      where: {
-        screenId: screen.id,
-        name: 'Default',
-      },
-    });
-
-    if (!defaultProfile) {
-      defaultProfile = await prismaWithProfiles.profile.create({
-        data: {
-          screenId: screen.id,
-          name: 'Default',
-        },
-      });
-    }
-
-    if ((screen as typeof screen & { activeProfileId?: string | null }).activeProfileId !== defaultProfile.id) {
-      await prisma.screen.update({
-        where: { id: screen.id },
-        data: { activeProfileId: defaultProfile.id },
-      });
-    }
-  }
-
-  console.log('Seed completed: 1 admin user, 3 screens, default profile per screen');
+  console.log('Seed completed: 1 admin user');
 }
 
 main()

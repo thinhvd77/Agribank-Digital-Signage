@@ -55,7 +55,7 @@ pnpm dev
 - Player: http://localhost:5173/player.html?screen=<screen-id>
 - API: http://localhost:3000
 
-Default login: `admin` / `admin123`
+Default login: `quantri` / `Dientoan@6421`
 
 ## Available Scripts
 

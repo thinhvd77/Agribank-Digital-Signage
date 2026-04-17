@@ -80,7 +80,7 @@ Five tables in PostgreSQL (see `prisma/schema.prisma`):
 
 ### CORS Configuration
 
-Restricted to LAN subnet pattern: `192.168.x.x`, `localhost`, `127.0.0.1`
+Restricted to LAN subnet pattern: `10.190.x.x`, `localhost`, `127.0.0.1`
 
 ## Key Technical Details
 
