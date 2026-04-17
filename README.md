@@ -66,7 +66,8 @@ Default login: `admin` / `admin123`
 | `pnpm dev:server` | Start Express server only |
 | `pnpm build` | Build for production |
 | `pnpm start` | Run production server |
-| `pnpm db:migrate` | Run Prisma migrations |
+| `pnpm deploy` | Migrate + generate Prisma client + build (production) |
+| `pnpm db:migrate` | Run Prisma migrations (dev) |
 | `pnpm db:seed` | Seed initial data (3 screens) |
 | `pnpm db:studio` | Open Prisma Studio |
 
@@ -89,9 +90,12 @@ agribank-digital-signage/
 │   └── schema.prisma       # Database schema
 ├── public/                 # Static assets
 ├── uploads/                # Uploaded media files
+├── docs/
+│   └── DEPLOYMENT.md       # Windows Server deployment guide
 ├── index.html              # Admin entry point
 ├── player.html             # Player entry point
-└── docker-compose.yml      # Docker configuration
+├── ecosystem.config.cjs    # PM2 process config
+└── nginx.conf.example      # Nginx reverse proxy template
 ```
 
 ## API Endpoints
@@ -118,25 +122,68 @@ agribank-digital-signage/
 | `status` | Client -> Server | Player status update |
 | `ping` | Server -> Client | Heartbeat (every 30s) |
 
-## Docker Deployment
+## Production Deployment (Windows Server)
 
-```bash
-# Start with Docker Compose
-docker-compose up -d
+Target stack: **PM2 + Nginx + PostgreSQL** on Windows Server. Full step-by-step guide (firewall, auto-start on boot, updates, backup, troubleshooting) lives in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
-# Access
-# App: http://localhost:3000
-# Database: localhost:5433
+### Server prerequisites
+
+- Node.js 20+, pnpm 10+
+- PostgreSQL 15+ (running on `localhost:5432`)
+- PM2 (`npm install -g pm2`) + `pm2-windows-startup` for auto-boot
+- Nginx for Windows
+
+### Deploy in ~5 commands
+
+```powershell
+cd C:\agribank-signage
+copy .env.production.example .env      # then edit DATABASE_URL + JWT_SECRET
+pnpm install --frozen-lockfile
+pnpm run deploy                         # prisma migrate + generate + build
+pnpm run db:seed                        # first deploy only — seeds 3 screens + admin
+pm2 start ecosystem.config.cjs
+pm2 save && pm2-startup install         # auto-restart on reboot
+```
+
+Generate a strong `JWT_SECRET`:
+
+```powershell
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+**Change the default admin password (`admin` / `admin123`) after first login.**
+
+### Nginx reverse proxy
+
+Copy [`nginx.conf.example`](nginx.conf.example) into your Nginx config, then edit:
+- `server_name` → server's LAN IP or hostname
+- `alias` path under `/uploads/` → match your install location
+
+Reload: `nginx -t && nginx -s reload`
+
+Nginx handles WebSocket upgrade for Socket.io and serves uploaded media directly from disk. Node runs internally on `127.0.0.1:3000`; clients hit Nginx on port 80.
+
+### Updating the app
+
+```powershell
+git pull
+pnpm install --frozen-lockfile
+pnpm run deploy
+pm2 restart agribank-signage
 ```
 
 ## Player Setup (Kiosk Mode)
 
-For LED screen deployment, run Chrome in kiosk mode:
+On each LED machine, run Chrome in kiosk mode pointing at the server:
 
 ```bash
-chromium --kiosk --noerrdialogs --disable-infobars \
-  "http://<server-ip>:3000/player.html?screen=<screen-uuid>"
+chrome --kiosk --noerrdialogs --disable-infobars ^
+  "http://<server-ip>/player.html?screen=<screen-uuid>"
 ```
+
+Get the screen UUID from the Admin Dashboard → **Screen Settings** (each screen displays its player URL, ready to copy).
+
+To auto-launch on Windows boot: drop a shortcut with the command above into `shell:startup`.
 
 ## Environment Variables
 
