@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import type { User } from '@shared/types';
 
 interface Props {
-  onLogin: (token: string) => void;
+  onLogin: (token: string, user: User) => void;
 }
 
 export default function LoginForm({ onLogin }: Props) {
@@ -28,8 +29,8 @@ export default function LoginForm({ onLogin }: Props) {
         throw new Error(data.message || 'Login failed');
       }
 
-      const { token } = await res.json();
-      onLogin(token);
+      const data = await res.json();
+      onLogin(data.token, data.user);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

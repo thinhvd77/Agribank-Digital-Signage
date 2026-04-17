@@ -3,16 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useApi } from '@shared/hooks/useApi';
 import { useDialog } from '@shared/hooks/useDialog';
 import { extractVideoDuration } from '@shared/utils/videoDuration';
-import type { Media, MediaListResponse } from '@shared/types';
+import type { Media, MediaListResponse, UserRole } from '@shared/types';
 
 interface Props {
   token: string;
+  userRole: UserRole;
   selectedProfileId: string | null;
   onAddToPlaylist?: (media: Media) => void;
   onSelectProfile?: () => void;
 }
 
-export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist, onSelectProfile }: Props) {
+export default function MediaLibrary({ token, userRole, selectedProfileId, onAddToPlaylist, onSelectProfile }: Props) {
   const { fetchApi, headers } = useApi(token);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -199,24 +200,26 @@ export default function MediaLibrary({ token, selectedProfileId, onAddToPlaylist
                       Thêm
                     </button>
                   )}
-                  <button
-                    onClick={async () => {
-                      const shouldDelete = await confirm({
-                        title: 'Xóa media',
-                        message: `Bạn có chắc chắn muốn xóa "${media.originalName}"? Hành động này không thể hoàn tác.`,
-                        confirmText: 'Xóa',
-                        cancelText: 'Hủy',
-                        variant: 'error',
-                      });
-                      if (shouldDelete) {
-                        deleteMutation.mutate(media.id);
-                        success('Đã xóa', 'Media đã được xóa thành công');
-                      }
-                    }}
-                    className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
-                  >
-                    Xóa
-                  </button>
+                  {userRole === 'admin' && (
+                    <button
+                      onClick={async () => {
+                        const shouldDelete = await confirm({
+                          title: 'Xóa media',
+                          message: `Bạn có chắc chắn muốn xóa "${media.originalName}"? Hành động này không thể hoàn tác.`,
+                          confirmText: 'Xóa',
+                          cancelText: 'Hủy',
+                          variant: 'error',
+                        });
+                        if (shouldDelete) {
+                          deleteMutation.mutate(media.id);
+                          success('Đã xóa', 'Media đã được xóa thành công');
+                        }
+                      }}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                    >
+                      Xóa
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
