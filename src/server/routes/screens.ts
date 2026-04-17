@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { requireAdmin, requireScreenAccess } from '../middleware/requireRole';
 
 const router = Router();
 
@@ -64,17 +65,22 @@ function getScreenId(idParam: string | string[] | undefined): string | null {
   return null;
 }
 
-// GET /api/screens - List all screens
-router.get('/', authMiddleware, async (_req: AuthRequest, res: Response) => {
+// GET /api/screens - List all screens (admins) or own screen only (screen_manager)
+router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const where: { deletedAt: null; id?: string } = { deletedAt: null };
+  if (req.role === 'screen_manager') {
+    if (!req.screenId) return res.json([]);
+    where.id = req.screenId;
+  }
   const screens = await prisma.screen.findMany({
-    where: { deletedAt: null },
+    where,
     orderBy: { name: 'asc' },
   });
   res.json(screens);
 });
 
 // GET /api/screens/:id - Get single screen
-router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/:id', authMiddleware, requireScreenAccess('id'), async (req: AuthRequest, res: Response) => {
   const screenId = getScreenId(req.params.id);
   if (!screenId) {
     return res.status(400).json({ message: 'Invalid screen id' });
@@ -92,7 +98,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/screens - Create screen
-router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/', authMiddleware, requireAdmin, async (req: AuthRequest, res: Response) => {
   const { name, location, resolution } = req.body;
 
   if (!name) {
@@ -112,7 +118,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/screens/:id - Update screen
-router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.put('/:id', authMiddleware, requireScreenAccess('id'), async (req: AuthRequest, res: Response) => {
   const { name, location, resolution } = req.body;
   const screenId = getScreenId(req.params.id);
 
@@ -143,7 +149,7 @@ router.put('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/screens/:id - Delete screen
-router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.delete('/:id', authMiddleware, requireAdmin, async (req: AuthRequest, res: Response) => {
   const screenId = getScreenId(req.params.id);
   if (!screenId) {
     return res.status(400).json({ message: 'Invalid screen id' });
