@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { requireScreenAccess } from '../middleware/requireRole';
 
 const router = Router();
 
@@ -42,6 +43,17 @@ function normalizeProfileName(value: unknown): string | null {
   return normalized;
 }
 
+async function assertScreenAccess(
+  req: AuthRequest,
+  res: Response,
+  screenId: string
+): Promise<boolean> {
+  if (req.role === 'admin') return true;
+  if (req.screenId === screenId) return true;
+  res.status(403).json({ message: 'Không có quyền truy cập màn hình này' });
+  return false;
+}
+
 function toPlayerPlaylist(
   items: Array<{
     mediaId: string;
@@ -61,7 +73,7 @@ function toPlayerPlaylist(
 }
 
 // GET /api/profiles/by-screen/:screenId - List profiles of a screen
-router.get('/by-screen/:screenId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/by-screen/:screenId', authMiddleware, requireScreenAccess('screenId'), async (req: AuthRequest, res: Response) => {
   const screenId = getParamValue(req.params.screenId);
   if (!screenId) {
     return res.status(400).json({ message: 'Invalid screen id' });
@@ -91,7 +103,7 @@ router.get('/by-screen/:screenId', authMiddleware, async (req: AuthRequest, res:
 });
 
 // POST /api/profiles/by-screen/:screenId - Create profile for a screen
-router.post('/by-screen/:screenId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/by-screen/:screenId', authMiddleware, requireScreenAccess('screenId'), async (req: AuthRequest, res: Response) => {
   const screenId = getParamValue(req.params.screenId);
   if (!screenId) {
     return res.status(400).json({ message: 'Invalid screen id' });
@@ -159,6 +171,8 @@ router.put('/:profileId/activate', authMiddleware, async (req: AuthRequest, res:
     return res.status(404).json({ message: 'Screen not found' });
   }
 
+  if (!(await assertScreenAccess(req, res, profile.screenId))) return;
+
   await prisma.screen.update({
     where: { id: profile.screenId },
     data: { activeProfileId: profile.id },
@@ -218,6 +232,8 @@ router.put('/:profileId', authMiddleware, async (req: AuthRequest, res: Response
     return res.status(404).json({ message: 'Screen not found' });
   }
 
+  if (!(await assertScreenAccess(req, res, existing.screenId))) return;
+
   try {
     const updated = await prisma.profile.update({
       where: { id: profileId },
@@ -270,6 +286,8 @@ router.delete('/:profileId', authMiddleware, async (req: AuthRequest, res: Respo
     return res.status(404).json({ message: 'Screen not found' });
   }
 
+  if (!(await assertScreenAccess(req, res, profile.screenId))) return;
+
   const profileCount = await prisma.profile.count({
     where: { screenId: profile.screenId },
   });
@@ -317,6 +335,7 @@ router.get('/:profileId/playlist-full', authMiddleware, async (req: AuthRequest,
     where: { id: profileId },
     select: {
       id: true,
+      screenId: true,
       screen: {
         select: {
           deletedAt: true,
@@ -332,6 +351,8 @@ router.get('/:profileId/playlist-full', authMiddleware, async (req: AuthRequest,
   if (profile.screen?.deletedAt) {
     return res.status(404).json({ message: 'Screen not found' });
   }
+
+  if (!(await assertScreenAccess(req, res, profile.screenId))) return;
 
   const items = await prisma.playlistItem.findMany({
     where: { profileId },
@@ -381,6 +402,8 @@ router.post('/:profileId/playlist', authMiddleware, async (req: AuthRequest, res
   if (profile.screen.deletedAt) {
     return res.status(404).json({ message: 'Screen not found' });
   }
+
+  if (!(await assertScreenAccess(req, res, profile.screenId))) return;
 
   await prisma.playlistItem.deleteMany({
     where: { profileId },
