@@ -21,13 +21,20 @@ enum MediaType {
   image
 }
 
+enum UserRole {
+  admin
+  screen_manager
+}
+
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  passwordHash String   @map("password_hash")
-  isAdmin      Boolean  @default(true) @map("is_admin")
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String    @id @default(uuid())
+  username     String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(admin)
+  screenId     String?   @unique @map("screen_id")
+  screen       Screen?   @relation("ScreenManager", fields: [screenId], references: [id], onDelete: SetNull)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
 
   @@map("users")
 }
@@ -45,6 +52,7 @@ model Screen {
   updatedAt       DateTime       @updatedAt @map("updated_at")
   profiles        Profile[]      @relation("ScreenProfiles")
   activeProfile   Profile?       @relation("ActiveProfile", fields: [activeProfileId], references: [id], onDelete: SetNull)
+  manager         User?          @relation("ScreenManager")
 
   @@index([status])
   @@index([activeProfileId])
